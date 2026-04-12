@@ -1,0 +1,87 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: hsl(0 0% 100%);
+  --color-foreground: hsl(0 0% 4%);
+  --color-card: hsl(0 0% 100%);
+  --color-card-foreground: hsl(0 0% 4%);
+  --color-popover: hsl(0 0% 100%);
+  --color-popover-foreground: hsl(0 0% 4%);
+  --color-primary: hsl(0 0% 9%);
+  --color-primary-foreground: hsl(0 0% 98%);
+  --color-secondary: hsl(0 0% 96%);
+  --color-secondary-foreground: hsl(0 0% 9%);
+  --color-muted: hsl(0 0% 96%);
+  --color-muted-foreground: hsl(0 0% 45%);
+  --color-accent: hsl(0 0% 96%);
+  --color-accent-foreground: hsl(0 0% 9%);
+  --color-destructive: hsl(0 72% 51%);
+  --color-destructive-foreground: hsl(0 0% 98%);
+  --color-border: hsl(0 0% 90%);
+  --color-input: hsl(0 0% 90%);
+  --color-ring: hsl(0 0% 4%);
+
+  --font-sans: "Geist", system-ui, sans-serif;
+  --radius: 0.5rem;
+
+  --animate-fade-in: fade-in 0.3s ease forwards;
+  --animate-slide-up: slide-up 0.4s ease forwards;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.dark {
+  --color-background: hsl(0 0% 6%);
+  --color-foreground: hsl(0 0% 96%);
+  --color-card: hsl(0 0% 9%);
+  --color-card-foreground: hsl(0 0% 96%);
+  --color-popover: hsl(0 0% 9%);
+  --color-popover-foreground: hsl(0 0% 96%);
+  --color-primary: hsl(0 0% 98%);
+  --color-primary-foreground: hsl(0 0% 9%);
+  --color-secondary: hsl(0 0% 14%);
+  --color-secondary-foreground: hsl(0 0% 98%);
+  --color-muted: hsl(0 0% 14%);
+  --color-muted-foreground: hsl(0 0% 55%);
+  --color-accent: hsl(0 0% 14%);
+  --color-accent-foreground: hsl(0 0% 98%);
+  --color-destructive: hsl(0 62% 40%);
+  --color-destructive-foreground: hsl(0 0% 98%);
+  --color-border: hsl(0 0% 16%);
+  --color-input: hsl(0 0% 16%);
+  --color-ring: hsl(0 0% 83%);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  border-color: var(--color-border);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body.custom-cursor,
+body.custom-cursor * {
+  cursor: none !important;
+}
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 2px; }
