@@ -82,8 +82,8 @@ export function SettingsManager({ settings }: { settings: SiteSettings | null })
   }
 
   return (
-    <div className="space-y-8 max-w-2xl">
-      <h1 className="text-lg font-semibold">Settings</h1>
+    <div className="max-w-3xl space-y-10">
+      <h1 className="text-2xl font-semibold tracking-tight">Settings</h1>
 
       {/* Theme */}
       <Section title="Theme">
@@ -92,7 +92,7 @@ export function SettingsManager({ settings }: { settings: SiteSettings | null })
             <button
               key={t}
               onClick={() => setTheme(t)}
-              className={`px-3 py-1.5 text-xs rounded-md border capitalize transition-colors ${theme === t ? "bg-foreground text-background border-foreground" : "border-border text-muted-foreground hover:text-foreground"}`}
+              className={`rounded-md border px-4 py-2 text-sm capitalize transition-colors ${theme === t ? "border-foreground bg-foreground text-background" : "border-border text-muted-foreground hover:text-foreground"}`}
             >
               {t}
             </button>
@@ -101,13 +101,13 @@ export function SettingsManager({ settings }: { settings: SiteSettings | null })
       </Section>
 
       {/* Cursor */}
-      <Section title="Cursor Style" extra={savingCursor ? <Loader2 size={12} className="animate-spin text-muted-foreground" /> : null}>
+      <Section title="Cursor Style" extra={savingCursor ? <Loader2 size={14} className="animate-spin text-muted-foreground" /> : null}>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
           {cursors.map(c => (
             <button
               key={c.id}
               onClick={() => saveCursor(c.id)}
-              className={`px-3 py-2 text-xs rounded-md border text-left transition-colors ${cursorType === c.id ? "bg-foreground text-background border-foreground" : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"}`}
+              className={`rounded-md border px-4 py-2.5 text-left text-sm transition-colors ${cursorType === c.id ? "border-foreground bg-foreground text-background" : "border-border text-muted-foreground hover:border-foreground/30 hover:text-foreground"}`}
             >
               {c.label}
             </button>
@@ -119,10 +119,10 @@ export function SettingsManager({ settings }: { settings: SiteSettings | null })
       <Section title="Change Username">
         <form onSubmit={unameForm.handleSubmit(changeUsername)} className="space-y-3">
           <FormField label="New username" error={unameForm.formState.errors.newUsername?.message}>
-            <input {...unameForm.register("newUsername")} className="w-full h-9 px-3 text-sm bg-background border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-ring" />
+            <input {...unameForm.register("newUsername")} className="h-11 w-full rounded-md border border-border bg-background px-4 text-base focus:outline-none focus:ring-1 focus:ring-ring" />
           </FormField>
           <FormField label="Current password" error={unameForm.formState.errors.currentPassword?.message}>
-            <input {...unameForm.register("currentPassword")} type="password" className="w-full h-9 px-3 text-sm bg-background border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-ring" />
+            <input {...unameForm.register("currentPassword")} type="password" className="h-11 w-full rounded-md border border-border bg-background px-4 text-base focus:outline-none focus:ring-1 focus:ring-ring" />
           </FormField>
           <SubmitBtn loading={unameForm.formState.isSubmitting} label="Update username" />
         </form>
@@ -132,13 +132,13 @@ export function SettingsManager({ settings }: { settings: SiteSettings | null })
       <Section title="Change Password">
         <form onSubmit={passForm.handleSubmit(changePassword)} className="space-y-3">
           <FormField label="Current password" error={passForm.formState.errors.currentPassword?.message}>
-            <input {...passForm.register("currentPassword")} type="password" className="w-full h-9 px-3 text-sm bg-background border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-ring" />
+            <input {...passForm.register("currentPassword")} type="password" className="h-11 w-full rounded-md border border-border bg-background px-4 text-base focus:outline-none focus:ring-1 focus:ring-ring" />
           </FormField>
           <FormField label="New password" error={passForm.formState.errors.newPassword?.message}>
-            <input {...passForm.register("newPassword")} type="password" className="w-full h-9 px-3 text-sm bg-background border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-ring" />
+            <input {...passForm.register("newPassword")} type="password" className="h-11 w-full rounded-md border border-border bg-background px-4 text-base focus:outline-none focus:ring-1 focus:ring-ring" />
           </FormField>
           <FormField label="Confirm password" error={passForm.formState.errors.confirmPassword?.message}>
-            <input {...passForm.register("confirmPassword")} type="password" className="w-full h-9 px-3 text-sm bg-background border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-ring" />
+            <input {...passForm.register("confirmPassword")} type="password" className="h-11 w-full rounded-md border border-border bg-background px-4 text-base focus:outline-none focus:ring-1 focus:ring-ring" />
           </FormField>
           <SubmitBtn loading={passForm.formState.isSubmitting} label="Update password" />
         </form>
@@ -149,9 +149,9 @@ export function SettingsManager({ settings }: { settings: SiteSettings | null })
 
 function Section({ title, children, extra }: { title: string; children: React.ReactNode; extra?: React.ReactNode }) {
   return (
-    <div className="space-y-4 p-5 rounded-lg border border-border">
+    <div className="space-y-4 rounded-lg border border-border p-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-medium">{title}</h2>
+        <h2 className="text-base font-medium">{title}</h2>
         {extra}
       </div>
       {children}
@@ -162,17 +162,17 @@ function Section({ title, children, extra }: { title: string; children: React.Re
 function FormField({ label, error, children }: { label: string; error?: string; children: React.ReactNode }) {
   return (
     <div>
-      <label className="text-xs font-medium text-muted-foreground mb-1.5 block">{label}</label>
+      <label className="mb-2 block text-sm font-medium text-muted-foreground">{label}</label>
       {children}
-      {error && <p className="text-xs text-destructive mt-1">{error}</p>}
+      {error && <p className="mt-1.5 text-sm text-destructive">{error}</p>}
     </div>
   )
 }
 
 function SubmitBtn({ loading, label }: { loading: boolean; label: string }) {
   return (
-    <button type="submit" disabled={loading} className="inline-flex items-center gap-2 px-3 py-2 text-xs rounded-md bg-foreground text-background hover:bg-foreground/90 transition-colors disabled:opacity-50">
-      {loading && <Loader2 size={12} className="animate-spin" />}
+    <button type="submit" disabled={loading} className="inline-flex items-center gap-2 rounded-md bg-foreground px-4 py-2.5 text-sm text-background transition-colors hover:bg-foreground/90 disabled:opacity-50">
+      {loading && <Loader2 size={14} className="animate-spin" />}
       {label}
     </button>
   )

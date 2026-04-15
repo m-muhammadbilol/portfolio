@@ -24,7 +24,13 @@ export function LanguageProvider({ children, defaultLang = "uz" }: { children: R
 
   useEffect(() => {
     const saved = localStorage.getItem("lang") as Language | null
-    if (saved === "uz" || saved === "en") setLangState(saved)
+    if (saved !== "uz" && saved !== "en") return
+
+    const frame = window.requestAnimationFrame(() => {
+      setLangState(saved)
+    })
+
+    return () => window.cancelAnimationFrame(frame)
   }, [])
 
   const setLang = (l: Language) => {

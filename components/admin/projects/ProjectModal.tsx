@@ -98,23 +98,23 @@ export function ProjectModal({ project, onClose, onSaved }: Props) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-card border border-border rounded-lg w-full max-w-xl max-h-[90vh] overflow-y-auto shadow-lg">
+      <div className="relative max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-lg border border-border bg-card shadow-lg">
         {/* Header */}
-        <div className="sticky top-0 bg-card border-b border-border px-5 py-3.5 flex items-center justify-between z-10">
-          <h2 className="text-sm font-medium">{project ? "Edit Project" : "New Project"}</h2>
+        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-card px-6 py-4">
+          <h2 className="text-base font-medium">{project ? "Edit Project" : "New Project"}</h2>
           <button
             type="button"
             onClick={onClose}
-            className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-accent transition-colors"
+            className="flex h-8 w-8 items-center justify-center rounded-md transition-colors hover:bg-accent"
           >
-            <X size={14} />
+            <X size={16} />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-5 space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-6 p-6">
           {/* Image */}
           <div>
-            <label className="text-xs font-medium text-muted-foreground mb-2 block">Image</label>
+            <label className="mb-2 block text-sm font-medium text-muted-foreground">Image</label>
             <ImageUpload
               value={imageUrl}
               onChange={setImageUrl}
@@ -126,43 +126,43 @@ export function ProjectModal({ project, onClose, onSaved }: Props) {
           {/* Titles */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Title (UZ) *</label>
+              <label className="mb-2 block text-sm font-medium text-muted-foreground">Title (UZ) *</label>
               <input
                 value={form.title_uz}
                 onChange={set("title_uz")}
-                className="w-full h-9 px-3 text-sm bg-background border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-ring"
+                className="h-11 w-full rounded-md border border-border bg-background px-4 text-base focus:outline-none focus:ring-1 focus:ring-ring"
               />
-              {errors.title_uz && <p className="text-xs text-destructive mt-1">{errors.title_uz}</p>}
+              {errors.title_uz && <p className="mt-1.5 text-sm text-destructive">{errors.title_uz}</p>}
             </div>
             <div>
-              <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Title (EN) *</label>
+              <label className="mb-2 block text-sm font-medium text-muted-foreground">Title (EN) *</label>
               <input
                 value={form.title_en}
                 onChange={set("title_en")}
-                className="w-full h-9 px-3 text-sm bg-background border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-ring"
+                className="h-11 w-full rounded-md border border-border bg-background px-4 text-base focus:outline-none focus:ring-1 focus:ring-ring"
               />
-              {errors.title_en && <p className="text-xs text-destructive mt-1">{errors.title_en}</p>}
+              {errors.title_en && <p className="mt-1.5 text-sm text-destructive">{errors.title_en}</p>}
             </div>
           </div>
 
           {/* Descriptions */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Description (UZ)</label>
+              <label className="mb-2 block text-sm font-medium text-muted-foreground">Description (UZ)</label>
               <textarea
                 value={form.description_uz}
                 onChange={set("description_uz")}
                 rows={3}
-                className="w-full px-3 py-2 text-sm bg-background border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-ring resize-none"
+                className="w-full resize-none rounded-md border border-border bg-background px-4 py-3 text-base focus:outline-none focus:ring-1 focus:ring-ring"
               />
             </div>
             <div>
-              <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Description (EN)</label>
+              <label className="mb-2 block text-sm font-medium text-muted-foreground">Description (EN)</label>
               <textarea
                 value={form.description_en}
                 onChange={set("description_en")}
                 rows={3}
-                className="w-full px-3 py-2 text-sm bg-background border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-ring resize-none"
+                className="w-full resize-none rounded-md border border-border bg-background px-4 py-3 text-base focus:outline-none focus:ring-1 focus:ring-ring"
               />
             </div>
           </div>
@@ -170,21 +170,21 @@ export function ProjectModal({ project, onClose, onSaved }: Props) {
           {/* Links */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Live Link</label>
+              <label className="mb-2 block text-sm font-medium text-muted-foreground">Live Link</label>
               <input
                 value={form.live_link}
                 onChange={set("live_link")}
                 placeholder="https://"
-                className="w-full h-9 px-3 text-sm bg-background border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-ring"
+                className="h-11 w-full rounded-md border border-border bg-background px-4 text-base focus:outline-none focus:ring-1 focus:ring-ring"
               />
             </div>
             <div>
-              <label className="text-xs font-medium text-muted-foreground mb-1.5 block">GitHub Link</label>
+              <label className="mb-2 block text-sm font-medium text-muted-foreground">GitHub Link</label>
               <input
                 value={form.github_link}
                 onChange={set("github_link")}
                 placeholder="https://github.com/..."
-                className="w-full h-9 px-3 text-sm bg-background border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-ring"
+                className="h-11 w-full rounded-md border border-border bg-background px-4 text-base focus:outline-none focus:ring-1 focus:ring-ring"
               />
             </div>
           </div>
@@ -192,21 +192,21 @@ export function ProjectModal({ project, onClose, onSaved }: Props) {
           {/* Tags + Order */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Tags (comma separated)</label>
+              <label className="mb-2 block text-sm font-medium text-muted-foreground">Tags (comma separated)</label>
               <input
                 value={form.tags}
                 onChange={set("tags")}
                 placeholder="React, Next.js, TypeScript"
-                className="w-full h-9 px-3 text-sm bg-background border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-ring"
+                className="h-11 w-full rounded-md border border-border bg-background px-4 text-base focus:outline-none focus:ring-1 focus:ring-ring"
               />
             </div>
             <div>
-              <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Sort Order</label>
+              <label className="mb-2 block text-sm font-medium text-muted-foreground">Sort Order</label>
               <input
                 value={form.sort_order}
                 onChange={set("sort_order")}
                 type="number"
-                className="w-full h-9 px-3 text-sm bg-background border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-ring"
+                className="h-11 w-full rounded-md border border-border bg-background px-4 text-base focus:outline-none focus:ring-1 focus:ring-ring"
               />
             </div>
           </div>
@@ -218,9 +218,9 @@ export function ProjectModal({ project, onClose, onSaved }: Props) {
               type="checkbox"
               checked={form.is_published}
               onChange={(e) => setForm((prev) => ({ ...prev, is_published: e.target.checked }))}
-              className="w-3.5 h-3.5 rounded"
+              className="h-4 w-4 rounded"
             />
-            <label htmlFor="is_published" className="text-sm">Published</label>
+            <label htmlFor="is_published" className="text-base">Published</label>
           </div>
 
           {/* Actions */}
@@ -228,16 +228,16 @@ export function ProjectModal({ project, onClose, onSaved }: Props) {
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-sm rounded-md border border-border hover:bg-accent transition-colors"
+              className="rounded-md border border-border px-4 py-2.5 text-base transition-colors hover:bg-accent"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="px-4 py-2 text-sm rounded-md bg-foreground text-background hover:bg-foreground/90 transition-colors flex items-center gap-2 disabled:opacity-50"
+              className="flex items-center gap-2 rounded-md bg-foreground px-4 py-2.5 text-base text-background transition-colors hover:bg-foreground/90 disabled:opacity-50"
             >
-              {saving && <Loader2 size={13} className="animate-spin" />}
+              {saving && <Loader2 size={15} className="animate-spin" />}
               {project ? "Update" : "Create"}
             </button>
           </div>

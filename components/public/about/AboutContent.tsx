@@ -29,11 +29,9 @@ export function AboutContent({ content }: Props) {
   const skillsRaw = content["about_skills"]?.value_uz || "React,Next.js,TypeScript,Tailwind CSS,JavaScript,HTML,CSS"
   const skills = skillsRaw.split(",").map((s) => s.trim()).filter(Boolean)
 
-  const sections = [bio, skills, experience, education]
-
   return (
-    <main className="min-h-screen px-6 py-16 max-w-xl mx-auto">
-      <div className="fixed top-4 right-4 flex items-center gap-1 z-20">
+    <main className="mx-auto min-h-screen max-w-2xl px-6 py-20 sm:py-24">
+      <div className="fixed top-4 right-4 z-20 flex items-center gap-1">
         <LanguageToggle />
         <ThemeToggle />
       </div>
@@ -41,28 +39,28 @@ export function AboutContent({ content }: Props) {
       <div
         className="mb-10 opacity-0 animate-[fade-in_0.4s_ease_0.05s_forwards]"
       >
-        <Link href="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+        <Link href="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground">
           <ArrowLeft size={14} />
           {t.nav.home}
         </Link>
       </div>
 
-      <div className="space-y-10">
+      <div className="space-y-12">
         <div className="opacity-0 animate-[slide-up_0.4s_ease_0.1s_forwards]">
-          <h1 className="text-2xl font-semibold tracking-tight">{t.about.title}</h1>
+          <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{t.about.title}</h1>
         </div>
 
         <div className="opacity-0 animate-[slide-up_0.4s_ease_0.15s_forwards]">
-          <p className="text-sm text-muted-foreground leading-relaxed">{bio}</p>
+          <p className="text-base leading-8 text-muted-foreground sm:text-lg">{bio}</p>
         </div>
 
         <div className="opacity-0 animate-[slide-up_0.4s_ease_0.2s_forwards] space-y-3">
-          <h2 className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{t.about.skills}</h2>
-          <div className="flex flex-wrap gap-2">
+          <h2 className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">{t.about.skills}</h2>
+          <div className="flex flex-wrap gap-3">
             {skills.map((skill) => (
               <span
                 key={skill}
-                className="px-3 py-1 text-xs rounded-full border border-border text-foreground/80 hover:border-foreground/30 transition-colors"
+                className="rounded-full border border-border px-4 py-1.5 text-sm text-foreground/80 transition-colors hover:border-foreground/30"
               >
                 {skill}
               </span>
@@ -71,13 +69,13 @@ export function AboutContent({ content }: Props) {
         </div>
 
         <div className="opacity-0 animate-[slide-up_0.4s_ease_0.25s_forwards] space-y-2">
-          <h2 className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{t.about.experience}</h2>
-          <p className="text-sm text-foreground/80 leading-relaxed">{experience}</p>
+          <h2 className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">{t.about.experience}</h2>
+          <p className="text-base leading-8 text-foreground/80 sm:text-lg">{experience}</p>
         </div>
 
         <div className="opacity-0 animate-[slide-up_0.4s_ease_0.3s_forwards] space-y-2">
-          <h2 className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{t.about.education}</h2>
-          <p className="text-sm text-foreground/80 leading-relaxed">{education}</p>
+          <h2 className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">{t.about.education}</h2>
+          <p className="text-base leading-8 text-foreground/80 sm:text-lg">{education}</p>
         </div>
       </div>
     </main>

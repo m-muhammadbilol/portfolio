@@ -5,6 +5,7 @@ import { LanguageProvider } from "@/components/providers/LanguageProvider"
 import { CursorProvider } from "@/components/providers/CursorProvider"
 import { CustomCursor } from "@/components/shared/CustomCursor"
 import { createClient } from "@supabase/supabase-js"
+import type { CursorType, Language } from "@/types"
 import "./globals.css"
 
 export const metadata: Metadata = {
@@ -14,8 +15,8 @@ export const metadata: Metadata = {
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  let cursor = "dot"
-  let defaultLang = "uz"
+  let cursor: CursorType = "dot"
+  let defaultLang: Language = "uz"
 
   try {
     const supabase = createClient(
@@ -27,8 +28,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       .select("active_cursor, default_language")
       .single()
     if (data) {
-      cursor = data.active_cursor || "dot"
-      defaultLang = data.default_language || "uz"
+      const nextCursor = data.active_cursor as CursorType | null
+      const nextLanguage = data.default_language as Language | null
+
+      if (nextCursor) cursor = nextCursor
+      if (nextLanguage === "uz" || nextLanguage === "en") defaultLang = nextLanguage
     }
   } catch {}
 
@@ -39,8 +43,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       </head>
       <body style={{ fontFamily: "system-ui, -apple-system, sans-serif", margin: 0 }}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <LanguageProvider defaultLang={defaultLang as "uz" | "en"}>
-            <CursorProvider initialCursor={cursor as any}>
+          <LanguageProvider defaultLang={defaultLang}>
+            <CursorProvider initialCursor={cursor}>
               <CustomCursor />
               {children}
               <Toaster richColors position="bottom-right" />

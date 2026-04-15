@@ -41,19 +41,19 @@ interface Props {
 function Field({ label, error, children }: { label: string; error?: string; children: React.ReactNode }) {
   return (
     <div>
-      <label className="text-xs font-medium text-muted-foreground mb-1.5 block">{label}</label>
+      <label className="mb-2 block text-sm font-medium text-muted-foreground">{label}</label>
       {children}
-      {error && <p className="text-xs text-destructive mt-1">{error}</p>}
+      {error && <p className="mt-1.5 text-sm text-destructive">{error}</p>}
     </div>
   )
 }
 
 function Input(props: React.InputHTMLAttributes<HTMLInputElement>) {
-  return <input {...props} className={`w-full h-9 px-3 text-sm bg-background border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-ring ${props.className || ""}`} />
+  return <input {...props} className={`h-11 w-full rounded-md border border-border bg-background px-4 text-base focus:outline-none focus:ring-1 focus:ring-ring ${props.className || ""}`} />
 }
 
 function Textarea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
-  return <textarea {...props} rows={props.rows || 3} className={`w-full px-3 py-2 text-sm bg-background border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-ring resize-none ${props.className || ""}`} />
+  return <textarea {...props} rows={props.rows || 3} className={`w-full resize-none rounded-md border border-border bg-background px-4 py-3 text-base focus:outline-none focus:ring-1 focus:ring-ring ${props.className || ""}`} />
 }
 
 export function ContentManager({ content, settings }: Props) {
@@ -134,8 +134,8 @@ export function ContentManager({ content, settings }: Props) {
   ]
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-lg font-semibold">Content</h1>
+    <div className="space-y-8">
+      <h1 className="text-2xl font-semibold tracking-tight">Content</h1>
 
       {/* Tabs */}
       <div className="flex border-b border-border">
@@ -143,7 +143,7 @@ export function ContentManager({ content, settings }: Props) {
           <button
             key={t.id}
             onClick={() => setTab(t.id)}
-            className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${tab === t.id ? "border-foreground text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+            className={`border-b-2 px-5 py-3 text-base font-medium transition-colors ${tab === t.id ? "border-foreground text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
           >
             {t.label}
           </button>
@@ -152,30 +152,30 @@ export function ContentManager({ content, settings }: Props) {
 
       {/* Home Tab */}
       {tab === "home" && (
-        <form onSubmit={homeForm.handleSubmit(saveHome)} className="space-y-6 max-w-2xl">
-          <div className="space-y-4 p-4 rounded-lg border border-border">
-            <h2 className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Profile Image</h2>
+        <form onSubmit={homeForm.handleSubmit(saveHome)} className="max-w-3xl space-y-6">
+          <div className="space-y-4 rounded-lg border border-border p-5">
+            <h2 className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">Profile Image</h2>
             <ImageUpload value={homeImage} onChange={setHomeImage} bucket="avatars" path="profile" label="Upload profile image" />
           </div>
 
-          <div className="space-y-4 p-4 rounded-lg border border-border">
-            <h2 className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Title</h2>
+          <div className="space-y-4 rounded-lg border border-border p-5">
+            <h2 className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">Title</h2>
             <div className="grid grid-cols-2 gap-3">
               <Field label="Uzbek"><Input {...homeForm.register("title_uz")} /></Field>
               <Field label="English"><Input {...homeForm.register("title_en")} /></Field>
             </div>
           </div>
 
-          <div className="space-y-4 p-4 rounded-lg border border-border">
-            <h2 className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Subtitle</h2>
+          <div className="space-y-4 rounded-lg border border-border p-5">
+            <h2 className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">Subtitle</h2>
             <div className="grid grid-cols-2 gap-3">
               <Field label="Uzbek"><Input {...homeForm.register("subtitle_uz")} /></Field>
               <Field label="English"><Input {...homeForm.register("subtitle_en")} /></Field>
             </div>
           </div>
 
-          <div className="space-y-4 p-4 rounded-lg border border-border">
-            <h2 className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Social Links</h2>
+          <div className="space-y-4 rounded-lg border border-border p-5">
+            <h2 className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">Social Links</h2>
             <Field label="Instagram"><Input {...homeForm.register("instagram")} placeholder="https://instagram.com/..." /></Field>
             <Field label="Telegram"><Input {...homeForm.register("telegram")} placeholder="https://t.me/..." /></Field>
             <Field label="GitHub"><Input {...homeForm.register("github")} placeholder="https://github.com/..." /></Field>
@@ -187,27 +187,27 @@ export function ContentManager({ content, settings }: Props) {
 
       {/* About Tab */}
       {tab === "about" && (
-        <form onSubmit={aboutForm.handleSubmit(saveAbout)} className="space-y-6 max-w-2xl">
-          <div className="space-y-4 p-4 rounded-lg border border-border">
-            <h2 className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Bio</h2>
+        <form onSubmit={aboutForm.handleSubmit(saveAbout)} className="max-w-3xl space-y-6">
+          <div className="space-y-4 rounded-lg border border-border p-5">
+            <h2 className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">Bio</h2>
             <Field label="Uzbek"><Textarea {...aboutForm.register("bio_uz")} rows={4} /></Field>
             <Field label="English"><Textarea {...aboutForm.register("bio_en")} rows={4} /></Field>
           </div>
 
-          <div className="space-y-4 p-4 rounded-lg border border-border">
-            <h2 className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Experience</h2>
+          <div className="space-y-4 rounded-lg border border-border p-5">
+            <h2 className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">Experience</h2>
             <Field label="Uzbek"><Textarea {...aboutForm.register("experience_uz")} /></Field>
             <Field label="English"><Textarea {...aboutForm.register("experience_en")} /></Field>
           </div>
 
-          <div className="space-y-4 p-4 rounded-lg border border-border">
-            <h2 className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Education</h2>
+          <div className="space-y-4 rounded-lg border border-border p-5">
+            <h2 className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">Education</h2>
             <Field label="Uzbek"><Textarea {...aboutForm.register("education_uz")} /></Field>
             <Field label="English"><Textarea {...aboutForm.register("education_en")} /></Field>
           </div>
 
-          <div className="space-y-4 p-4 rounded-lg border border-border">
-            <h2 className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Skills</h2>
+          <div className="space-y-4 rounded-lg border border-border p-5">
+            <h2 className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">Skills</h2>
             <Field label="Comma separated (same for both languages)">
               <Input {...aboutForm.register("skills")} placeholder="React, Next.js, TypeScript" />
             </Field>
@@ -222,8 +222,8 @@ export function ContentManager({ content, settings }: Props) {
 
 function SaveButton({ loading }: { loading: boolean }) {
   return (
-    <button type="submit" disabled={loading} className="inline-flex items-center gap-2 px-4 py-2 text-sm rounded-md bg-foreground text-background hover:bg-foreground/90 transition-colors disabled:opacity-50">
-      {loading && <Loader2 size={13} className="animate-spin" />}
+    <button type="submit" disabled={loading} className="inline-flex items-center gap-2 rounded-md bg-foreground px-5 py-2.5 text-base text-background transition-colors hover:bg-foreground/90 disabled:opacity-50">
+      {loading && <Loader2 size={15} className="animate-spin" />}
       Save Changes
     </button>
   )

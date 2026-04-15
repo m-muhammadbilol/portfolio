@@ -46,33 +46,33 @@ export function ProjectsManager({ initialProjects }: { initialProjects: Project[
   }
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-lg font-semibold">Loyihalar</h1>
-          <p className="text-xs text-muted-foreground mt-0.5">{projects.length} ta</p>
+          <h1 className="text-2xl font-semibold tracking-tight">Loyihalar</h1>
+          <p className="mt-1 text-sm text-muted-foreground">{projects.length} ta</p>
         </div>
         <button
           onClick={() => { setEditProject(null); setModalOpen(true) }}
-          className="inline-flex items-center gap-2 px-3 py-2 text-sm rounded-md bg-foreground text-background hover:bg-foreground/90 transition-colors"
+          className="inline-flex items-center gap-2 rounded-md bg-foreground px-4 py-2.5 text-base text-background transition-colors hover:bg-foreground/90"
         >
-          <Plus size={13} />
-          Qo'shish
+          <Plus size={15} />
+          Qo&apos;shish
         </button>
       </div>
 
       {projects.length === 0 ? (
-        <div className="py-16 text-center text-sm text-muted-foreground border border-border rounded-lg">
-          Hozircha loyihalar yo'q.
+        <div className="rounded-lg border border-border py-16 text-center text-base text-muted-foreground">
+          Hozircha loyihalar yo&apos;q.
         </div>
       ) : (
         <div className="rounded-lg border border-border overflow-hidden">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border bg-muted/40">
-                <th className="text-left px-4 py-2.5 text-xs font-medium text-muted-foreground">Sarlavha</th>
-                <th className="text-left px-4 py-2.5 text-xs font-medium text-muted-foreground hidden sm:table-cell">Teglar</th>
-                <th className="text-left px-4 py-2.5 text-xs font-medium text-muted-foreground hidden md:table-cell">Holat</th>
+                <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Sarlavha</th>
+                <th className="hidden px-4 py-3 text-left text-sm font-medium text-muted-foreground sm:table-cell">Teglar</th>
+                <th className="hidden px-4 py-3 text-left text-sm font-medium text-muted-foreground md:table-cell">Holat</th>
                 <th className="px-4 py-2.5 w-24"></th>
               </tr>
             </thead>
@@ -80,31 +80,31 @@ export function ProjectsManager({ initialProjects }: { initialProjects: Project[
               {projects.map((project, i) => (
                 <tr key={project.id} className={`border-b border-border last:border-0 hover:bg-muted/20 transition-colors ${i % 2 === 0 ? "" : "bg-muted/10"}`}>
                   <td className="px-4 py-3">
-                    <div className="font-medium text-sm truncate max-w-[200px]">{project.title_uz}</div>
-                    <div className="text-xs text-muted-foreground truncate max-w-[200px]">{project.title_en}</div>
+                    <div className="max-w-[220px] truncate text-base font-medium">{project.title_uz}</div>
+                    <div className="max-w-[220px] truncate text-sm text-muted-foreground">{project.title_en}</div>
                   </td>
                   <td className="px-4 py-3 hidden sm:table-cell">
                     <div className="flex flex-wrap gap-1">
                       {project.tags?.slice(0, 3).map(tag => (
-                        <span key={tag} className="px-1.5 py-0.5 text-[10px] rounded border border-border text-muted-foreground">{tag}</span>
+                        <span key={tag} className="rounded border border-border px-2 py-0.5 text-xs text-muted-foreground">{tag}</span>
                       ))}
                     </div>
                   </td>
                   <td className="px-4 py-3 hidden md:table-cell">
-                    <span className={`px-2 py-0.5 text-[10px] rounded-full border ${project.is_published ? "border-foreground/20 text-foreground" : "border-border text-muted-foreground"}`}>
+                    <span className={`rounded-full border px-2.5 py-1 text-xs ${project.is_published ? "border-foreground/20 text-foreground" : "border-border text-muted-foreground"}`}>
                       {project.is_published ? "Chop etilgan" : "Qoralama"}
                     </span>
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center justify-end gap-1">
-                      <button onClick={() => togglePublish(project)} className="w-7 h-7 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors">
-                        {project.is_published ? <EyeOff size={13} /> : <Eye size={13} />}
+                      <button onClick={() => togglePublish(project)} className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
+                        {project.is_published ? <EyeOff size={14} /> : <Eye size={14} />}
                       </button>
-                      <button onClick={() => { setEditProject(project); setModalOpen(true) }} className="w-7 h-7 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors">
-                        <Pencil size={13} />
+                      <button onClick={() => { setEditProject(project); setModalOpen(true) }} className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
+                        <Pencil size={14} />
                       </button>
-                      <button onClick={() => setDeleteId(project.id)} className="w-7 h-7 flex items-center justify-center rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors">
-                        <Trash2 size={13} />
+                      <button onClick={() => setDeleteId(project.id)} className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive">
+                        <Trash2 size={14} />
                       </button>
                     </div>
                   </td>

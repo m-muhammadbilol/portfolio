@@ -35,38 +35,38 @@ export default async function AdminDashboard() {
   ]
 
   return (
-    <div className="space-y-8 max-w-3xl">
+    <div className="max-w-4xl space-y-10">
       <div>
-        <h1 className="text-lg font-semibold">Dashboard</h1>
-        <p className="text-sm text-muted-foreground mt-0.5">Welcome back, {session.username}</p>
+        <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
+        <p className="mt-1 text-base text-muted-foreground">Welcome back, {session.username}</p>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid gap-4 sm:grid-cols-3">
         {stats.map(({ label, value, icon: Icon }) => (
-          <div key={label} className="p-4 rounded-lg border border-border bg-card">
+          <div key={label} className="rounded-lg border border-border bg-card p-5">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-xs text-muted-foreground">{label}</span>
-              <Icon size={13} className="text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">{label}</span>
+              <Icon size={16} className="text-muted-foreground" />
             </div>
-            <p className="text-2xl font-semibold tracking-tight">{value}</p>
+            <p className="text-3xl font-semibold tracking-tight">{value}</p>
           </div>
         ))}
       </div>
 
       {/* Quick links */}
       <div>
-        <h2 className="text-xs font-medium uppercase tracking-wider text-muted-foreground mb-3">Quick Actions</h2>
+        <h2 className="mb-4 text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">Quick Actions</h2>
         <div className="grid gap-3 sm:grid-cols-3">
           {quickLinks.map(({ href, label, icon: Icon, desc }) => (
             <Link
               key={href}
               href={href}
-              className="p-4 rounded-lg border border-border bg-card hover:border-foreground/20 hover:bg-accent/50 transition-all group"
+              className="group rounded-lg border border-border bg-card p-5 transition-all hover:border-foreground/20 hover:bg-accent/50"
             >
-              <Icon size={16} className="mb-3 text-muted-foreground group-hover:text-foreground transition-colors" />
-              <p className="text-sm font-medium mb-1">{label}</p>
-              <p className="text-xs text-muted-foreground">{desc}</p>
+              <Icon size={18} className="mb-3 text-muted-foreground transition-colors group-hover:text-foreground" />
+              <p className="mb-1 text-base font-medium">{label}</p>
+              <p className="text-sm text-muted-foreground">{desc}</p>
             </Link>
           ))}
         </div>
@@ -77,9 +77,9 @@ export default async function AdminDashboard() {
         <Link
           href="/"
           target="_blank"
-          className="inline-flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors"
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
         >
-          <ExternalLink size={12} />
+          <ExternalLink size={14} />
           View public site
         </Link>
       </div>

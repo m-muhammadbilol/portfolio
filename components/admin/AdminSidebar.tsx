@@ -31,11 +31,11 @@ export function AdminSidebar() {
     <>
       {/* Mobile toggle */}
       <button
-        className="fixed top-4 left-4 z-40 md:hidden w-8 h-8 flex items-center justify-center rounded-md border border-border bg-background hover:bg-accent transition-colors"
+        className="fixed top-4 left-4 z-40 flex h-9 w-9 items-center justify-center rounded-md border border-border bg-background transition-colors hover:bg-accent md:hidden"
         onClick={() => setMobileOpen(!mobileOpen)}
         aria-label="Toggle menu"
       >
-        {mobileOpen ? <X size={14} /> : <Menu size={14} />}
+        {mobileOpen ? <X size={16} /> : <Menu size={16} />}
       </button>
 
       {/* Overlay */}
@@ -52,24 +52,24 @@ export function AdminSidebar() {
         md:translate-x-0
       `}>
         {/* Logo */}
-        <div className="h-14 flex items-center px-5 border-b border-border">
-          <span className="text-sm font-medium tracking-tight">Admin</span>
+        <div className="flex h-16 items-center border-b border-border px-5">
+          <span className="text-base font-medium tracking-tight">Admin</span>
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 py-4 px-2 space-y-0.5">
+        <nav className="flex-1 space-y-1 px-3 py-5">
           {nav.map(({ href, label, icon: Icon, exact }) => (
             <Link
               key={href}
               href={href}
               onClick={() => setMobileOpen(false)}
-              className={`flex items-center gap-3 px-3 py-2 text-sm rounded-md transition-colors ${
+              className={`flex items-center gap-3 rounded-md px-3.5 py-2.5 text-base transition-colors ${
                 isActive(href, exact)
                   ? "bg-foreground text-background"
                   : "text-muted-foreground hover:text-foreground hover:bg-accent"
               }`}
             >
-              <Icon size={14} />
+              <Icon size={16} />
               {label}
             </Link>
           ))}
@@ -79,9 +79,9 @@ export function AdminSidebar() {
         <div className="p-2 border-t border-border">
           <button
             onClick={logout}
-            className="w-full flex items-center gap-3 px-3 py-2 text-sm rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+            className="flex w-full items-center gap-3 rounded-md px-3.5 py-2.5 text-base text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
           >
-            <LogOut size={14} />
+            <LogOut size={16} />
             Logout
           </button>
         </div>

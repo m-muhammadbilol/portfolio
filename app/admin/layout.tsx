@@ -14,10 +14,10 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       {/* Main content */}
       <div className="md:pl-52">
         {/* Top bar */}
-        <header className="h-14 border-b border-border flex items-center justify-between px-5">
+        <header className="flex h-16 items-center justify-between border-b border-border px-5 sm:px-6">
           <div className="md:hidden" /> {/* spacer for mobile menu btn */}
           <div className="flex items-center gap-1 ml-auto">
-            <span className="text-xs text-muted-foreground mr-2 hidden sm:block">
+            <span className="mr-2 hidden text-sm text-muted-foreground sm:block">
               {session.username}
             </span>
             <ThemeToggle />
@@ -25,7 +25,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         </header>
 
         {/* Page */}
-        <main className="p-5 sm:p-6">
+        <main className="p-5 sm:p-8">
           {children}
         </main>
       </div>
