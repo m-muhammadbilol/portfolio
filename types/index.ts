@@ -30,6 +30,10 @@ export interface SiteSettings {
   social_instagram: string
   social_telegram: string
   social_github: string
+  social_youtube: string
+  social_facebook: string
+  social_twitter: string
+  social_linkedin: string
   home_image_url: string
 }
 

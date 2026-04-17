@@ -1,93 +1,72 @@
 "use client"
 
 import { useState } from "react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { z } from "zod"
 import { Loader2 } from "lucide-react"
 import { toast } from "sonner"
 import { ImageUpload } from "@/components/shared/ImageUpload"
-import { createClient } from "@/lib/supabase/client"
+import { createClient } from "@supabase/supabase-js"
 import type { SiteContent, SiteSettings } from "@/types"
-
-const homeSchema = z.object({
-  title_uz: z.string(),
-  title_en: z.string(),
-  subtitle_uz: z.string(),
-  subtitle_en: z.string(),
-  instagram: z.string(),
-  telegram: z.string(),
-  github: z.string(),
-})
-
-const aboutSchema = z.object({
-  bio_uz: z.string(),
-  bio_en: z.string(),
-  experience_uz: z.string(),
-  experience_en: z.string(),
-  education_uz: z.string(),
-  education_en: z.string(),
-  skills: z.string(),
-})
-
-type HomeForm = z.infer<typeof homeSchema>
-type AboutForm = z.infer<typeof aboutSchema>
 
 interface Props {
   content: Record<string, SiteContent>
   settings: SiteSettings | null
 }
 
-function Field({ label, error, children }: { label: string; error?: string; children: React.ReactNode }) {
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <label className="mb-2 block text-sm font-medium text-muted-foreground">{label}</label>
+      <label className="text-xs font-medium text-muted-foreground mb-1.5 block">{label}</label>
       {children}
-      {error && <p className="mt-1.5 text-sm text-destructive">{error}</p>}
     </div>
   )
 }
 
 function Input(props: React.InputHTMLAttributes<HTMLInputElement>) {
-  return <input {...props} className={`h-11 w-full rounded-md border border-border bg-background px-4 text-base focus:outline-none focus:ring-1 focus:ring-ring ${props.className || ""}`} />
+  return <input {...props} className="w-full h-9 px-3 text-sm bg-background border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-ring" />
 }
 
 function Textarea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
-  return <textarea {...props} rows={props.rows || 3} className={`w-full resize-none rounded-md border border-border bg-background px-4 py-3 text-base focus:outline-none focus:ring-1 focus:ring-ring ${props.className || ""}`} />
+  return <textarea {...props} rows={props.rows || 3} className="w-full px-3 py-2 text-sm bg-background border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-ring resize-none" />
 }
 
 export function ContentManager({ content, settings }: Props) {
   const [tab, setTab] = useState<"home" | "about">("home")
+  const [saving, setSaving] = useState(false)
   const [homeImage, setHomeImage] = useState(settings?.home_image_url || "")
-  const supabase = createClient()
 
-  const homeForm = useForm<HomeForm>({
-    resolver: zodResolver(homeSchema),
-    defaultValues: {
-      title_uz: content["home_title"]?.value_uz || "Assalomu alaykum, men Muhammadbilol",
-      title_en: content["home_title"]?.value_en || "Hello, I am Muhammadbilol",
-      subtitle_uz: content["home_subtitle"]?.value_uz || "Frontend dasturchi",
-      subtitle_en: content["home_subtitle"]?.value_en || "Frontend Developer",
-      instagram: settings?.social_instagram || "",
-      telegram: settings?.social_telegram || "",
-      github: settings?.social_github || "",
-    },
+  const [homeForm, setHomeForm] = useState({
+    title_uz: content["home_title"]?.value_uz || "Assalomu alaykum, men Muhammadbilol",
+    title_en: content["home_title"]?.value_en || "Hello, I am Muhammadbilol",
+    subtitle_uz: content["home_subtitle"]?.value_uz || "Frontend dasturchi",
+    subtitle_en: content["home_subtitle"]?.value_en || "Frontend Developer",
+    github: settings?.social_github || "",
+    telegram: settings?.social_telegram || "",
+    instagram: settings?.social_instagram || "",
+    youtube: settings?.social_youtube || "",
+    facebook: settings?.social_facebook || "",
+    twitter: settings?.social_twitter || "",
+    linkedin: settings?.social_linkedin || "",
   })
 
-  const aboutForm = useForm<AboutForm>({
-    resolver: zodResolver(aboutSchema),
-    defaultValues: {
-      bio_uz: content["about_bio"]?.value_uz || "",
-      bio_en: content["about_bio"]?.value_en || "",
-      experience_uz: content["about_experience"]?.value_uz || "",
-      experience_en: content["about_experience"]?.value_en || "",
-      education_uz: content["about_education"]?.value_uz || "",
-      education_en: content["about_education"]?.value_en || "",
-      skills: content["about_skills"]?.value_uz || "React,Next.js,TypeScript,Tailwind CSS",
-    },
+  const [aboutForm, setAboutForm] = useState({
+    bio_uz: content["about_bio"]?.value_uz || "",
+    bio_en: content["about_bio"]?.value_en || "",
+    experience_uz: content["about_experience"]?.value_uz || "",
+    experience_en: content["about_experience"]?.value_en || "",
+    education_uz: content["about_education"]?.value_uz || "",
+    education_en: content["about_education"]?.value_en || "",
+    skills: content["about_skills"]?.value_uz || "React,Next.js,TypeScript,Tailwind CSS",
   })
+
+  function getClient() {
+    return createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    )
+  }
 
   const upsertContent = async (key: string, uz: string, en: string) => {
+    const supabase = getClient()
     const existing = content[key]
     if (existing) {
       await supabase.from("site_content").update({ value_uz: uz, value_en: en, updated_at: new Date().toISOString() }).eq("key", key)
@@ -96,135 +75,144 @@ export function ContentManager({ content, settings }: Props) {
     }
   }
 
-  const saveHome = async (data: HomeForm) => {
+  const saveHome = async () => {
+    setSaving(true)
     try {
-      await upsertContent("home_title", data.title_uz, data.title_en)
-      await upsertContent("home_subtitle", data.subtitle_uz, data.subtitle_en)
-      const settingsId = settings?.id
-      if (settingsId) {
+      await upsertContent("home_title", homeForm.title_uz, homeForm.title_en)
+      await upsertContent("home_subtitle", homeForm.subtitle_uz, homeForm.subtitle_en)
+      const supabase = getClient()
+      if (settings?.id) {
         await supabase.from("site_settings").update({
-          social_instagram: data.instagram,
-          social_telegram: data.telegram,
-          social_github: data.github,
+          social_github: homeForm.github,
+          social_telegram: homeForm.telegram,
+          social_instagram: homeForm.instagram,
+          social_youtube: homeForm.youtube,
+          social_facebook: homeForm.facebook,
+          social_twitter: homeForm.twitter,
+          social_linkedin: homeForm.linkedin,
           home_image_url: homeImage,
           updated_at: new Date().toISOString(),
-        }).eq("id", settingsId)
+        }).eq("id", settings.id)
       }
-      toast.success("Home content saved")
+      toast.success("Saqlandi!")
     } catch {
-      toast.error("Failed to save")
+      toast.error("Xato yuz berdi")
+    } finally {
+      setSaving(false)
     }
   }
 
-  const saveAbout = async (data: AboutForm) => {
+  const saveAbout = async () => {
+    setSaving(true)
     try {
-      await upsertContent("about_bio", data.bio_uz, data.bio_en)
-      await upsertContent("about_experience", data.experience_uz, data.experience_en)
-      await upsertContent("about_education", data.education_uz, data.education_en)
-      await upsertContent("about_skills", data.skills, data.skills)
-      toast.success("About content saved")
+      await upsertContent("about_bio", aboutForm.bio_uz, aboutForm.bio_en)
+      await upsertContent("about_experience", aboutForm.experience_uz, aboutForm.experience_en)
+      await upsertContent("about_education", aboutForm.education_uz, aboutForm.education_en)
+      await upsertContent("about_skills", aboutForm.skills, aboutForm.skills)
+      toast.success("Saqlandi!")
     } catch {
-      toast.error("Failed to save")
+      toast.error("Xato yuz berdi")
+    } finally {
+      setSaving(false)
     }
   }
 
-  const tabs = [
-    { id: "home" as const, label: "Home" },
-    { id: "about" as const, label: "About" },
-  ]
+  const setH = (k: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+    setHomeForm(p => ({ ...p, [k]: e.target.value }))
+
+  const setA = (k: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+    setAboutForm(p => ({ ...p, [k]: e.target.value }))
 
   return (
-    <div className="space-y-8">
-      <h1 className="text-2xl font-semibold tracking-tight">Content</h1>
+    <div className="space-y-6">
+      <h1 className="text-lg font-semibold">Kontent</h1>
 
-      {/* Tabs */}
       <div className="flex border-b border-border">
-        {tabs.map(t => (
+        {[{ id: "home", label: "Home" }, { id: "about", label: "About" }].map(t => (
           <button
             key={t.id}
-            onClick={() => setTab(t.id)}
-            className={`border-b-2 px-5 py-3 text-base font-medium transition-colors ${tab === t.id ? "border-foreground text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+            onClick={() => setTab(t.id as any)}
+            className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${tab === t.id ? "border-foreground text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
           >
             {t.label}
           </button>
         ))}
       </div>
 
-      {/* Home Tab */}
       {tab === "home" && (
-        <form onSubmit={homeForm.handleSubmit(saveHome)} className="max-w-3xl space-y-6">
-          <div className="space-y-4 rounded-lg border border-border p-5">
-            <h2 className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">Profile Image</h2>
-            <ImageUpload value={homeImage} onChange={setHomeImage} bucket="avatars" path="profile" label="Upload profile image" />
+        <div className="space-y-5 max-w-2xl">
+          {/* Image */}
+          <div className="p-4 rounded-lg border border-border space-y-3">
+            <h2 className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Profil rasmi</h2>
+            <ImageUpload value={homeImage} onChange={setHomeImage} bucket="avatars" path="profile" label="Rasm yuklash" />
           </div>
 
-          <div className="space-y-4 rounded-lg border border-border p-5">
-            <h2 className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">Title</h2>
+          {/* Title */}
+          <div className="p-4 rounded-lg border border-border space-y-3">
+            <h2 className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Sarlavha</h2>
             <div className="grid grid-cols-2 gap-3">
-              <Field label="Uzbek"><Input {...homeForm.register("title_uz")} /></Field>
-              <Field label="English"><Input {...homeForm.register("title_en")} /></Field>
+              <Field label="O'zbek"><Input value={homeForm.title_uz} onChange={setH("title_uz")} /></Field>
+              <Field label="Ingliz"><Input value={homeForm.title_en} onChange={setH("title_en")} /></Field>
             </div>
           </div>
 
-          <div className="space-y-4 rounded-lg border border-border p-5">
-            <h2 className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">Subtitle</h2>
+          {/* Subtitle */}
+          <div className="p-4 rounded-lg border border-border space-y-3">
+            <h2 className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Taglavha</h2>
             <div className="grid grid-cols-2 gap-3">
-              <Field label="Uzbek"><Input {...homeForm.register("subtitle_uz")} /></Field>
-              <Field label="English"><Input {...homeForm.register("subtitle_en")} /></Field>
+              <Field label="O'zbek"><Input value={homeForm.subtitle_uz} onChange={setH("subtitle_uz")} /></Field>
+              <Field label="Ingliz"><Input value={homeForm.subtitle_en} onChange={setH("subtitle_en")} /></Field>
             </div>
           </div>
 
-          <div className="space-y-4 rounded-lg border border-border p-5">
-            <h2 className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">Social Links</h2>
-            <Field label="Instagram"><Input {...homeForm.register("instagram")} placeholder="https://instagram.com/..." /></Field>
-            <Field label="Telegram"><Input {...homeForm.register("telegram")} placeholder="https://t.me/..." /></Field>
-            <Field label="GitHub"><Input {...homeForm.register("github")} placeholder="https://github.com/..." /></Field>
+          {/* Social links */}
+          <div className="p-4 rounded-lg border border-border space-y-3">
+            <h2 className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Ijtimoiy tarmoqlar</h2>
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="GitHub"><Input value={homeForm.github} onChange={setH("github")} placeholder="https://github.com/..." /></Field>
+              <Field label="Telegram"><Input value={homeForm.telegram} onChange={setH("telegram")} placeholder="https://t.me/..." /></Field>
+              <Field label="Instagram"><Input value={homeForm.instagram} onChange={setH("instagram")} placeholder="https://instagram.com/..." /></Field>
+              <Field label="YouTube"><Input value={homeForm.youtube} onChange={setH("youtube")} placeholder="https://youtube.com/..." /></Field>
+              <Field label="Facebook"><Input value={homeForm.facebook} onChange={setH("facebook")} placeholder="https://facebook.com/..." /></Field>
+              <Field label="Twitter / X"><Input value={homeForm.twitter} onChange={setH("twitter")} placeholder="https://twitter.com/..." /></Field>
+              <Field label="LinkedIn"><Input value={homeForm.linkedin} onChange={setH("linkedin")} placeholder="https://linkedin.com/in/..." /></Field>
+            </div>
           </div>
 
-          <SaveButton loading={homeForm.formState.isSubmitting} />
-        </form>
+          <button onClick={saveHome} disabled={saving} className="inline-flex items-center gap-2 px-4 py-2 text-sm rounded-md bg-foreground text-background hover:bg-foreground/90 transition-colors disabled:opacity-50">
+            {saving && <Loader2 size={13} className="animate-spin" />}
+            Saqlash
+          </button>
+        </div>
       )}
 
-      {/* About Tab */}
       {tab === "about" && (
-        <form onSubmit={aboutForm.handleSubmit(saveAbout)} className="max-w-3xl space-y-6">
-          <div className="space-y-4 rounded-lg border border-border p-5">
-            <h2 className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">Bio</h2>
-            <Field label="Uzbek"><Textarea {...aboutForm.register("bio_uz")} rows={4} /></Field>
-            <Field label="English"><Textarea {...aboutForm.register("bio_en")} rows={4} /></Field>
+        <div className="space-y-5 max-w-2xl">
+          <div className="p-4 rounded-lg border border-border space-y-3">
+            <h2 className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Bio</h2>
+            <Field label="O'zbek"><Textarea value={aboutForm.bio_uz} onChange={setA("bio_uz")} rows={4} /></Field>
+            <Field label="Ingliz"><Textarea value={aboutForm.bio_en} onChange={setA("bio_en")} rows={4} /></Field>
           </div>
-
-          <div className="space-y-4 rounded-lg border border-border p-5">
-            <h2 className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">Experience</h2>
-            <Field label="Uzbek"><Textarea {...aboutForm.register("experience_uz")} /></Field>
-            <Field label="English"><Textarea {...aboutForm.register("experience_en")} /></Field>
+          <div className="p-4 rounded-lg border border-border space-y-3">
+            <h2 className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Tajriba</h2>
+            <Field label="O'zbek"><Textarea value={aboutForm.experience_uz} onChange={setA("experience_uz")} /></Field>
+            <Field label="Ingliz"><Textarea value={aboutForm.experience_en} onChange={setA("experience_en")} /></Field>
           </div>
-
-          <div className="space-y-4 rounded-lg border border-border p-5">
-            <h2 className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">Education</h2>
-            <Field label="Uzbek"><Textarea {...aboutForm.register("education_uz")} /></Field>
-            <Field label="English"><Textarea {...aboutForm.register("education_en")} /></Field>
+          <div className="p-4 rounded-lg border border-border space-y-3">
+            <h2 className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Ta'lim</h2>
+            <Field label="O'zbek"><Textarea value={aboutForm.education_uz} onChange={setA("education_uz")} /></Field>
+            <Field label="Ingliz"><Textarea value={aboutForm.education_en} onChange={setA("education_en")} /></Field>
           </div>
-
-          <div className="space-y-4 rounded-lg border border-border p-5">
-            <h2 className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">Skills</h2>
-            <Field label="Comma separated (same for both languages)">
-              <Input {...aboutForm.register("skills")} placeholder="React, Next.js, TypeScript" />
-            </Field>
+          <div className="p-4 rounded-lg border border-border space-y-3">
+            <h2 className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Ko'nikmalar (vergul bilan)</h2>
+            <Field label="Bir xil ikki tilda"><Input value={aboutForm.skills} onChange={setA("skills")} placeholder="React, Next.js, TypeScript" /></Field>
           </div>
-
-          <SaveButton loading={aboutForm.formState.isSubmitting} />
-        </form>
+          <button onClick={saveAbout} disabled={saving} className="inline-flex items-center gap-2 px-4 py-2 text-sm rounded-md bg-foreground text-background hover:bg-foreground/90 transition-colors disabled:opacity-50">
+            {saving && <Loader2 size={13} className="animate-spin" />}
+            Saqlash
+          </button>
+        </div>
       )}
     </div>
-  )
-}
-
-function SaveButton({ loading }: { loading: boolean }) {
-  return (
-    <button type="submit" disabled={loading} className="inline-flex items-center gap-2 rounded-md bg-foreground px-5 py-2.5 text-base text-background transition-colors hover:bg-foreground/90 disabled:opacity-50">
-      {loading && <Loader2 size={15} className="animate-spin" />}
-      Save Changes
-    </button>
   )
 }
