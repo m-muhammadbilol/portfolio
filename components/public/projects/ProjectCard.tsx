@@ -10,12 +10,36 @@ export function ProjectCard({ project }: { project: Project }) {
 
   const title = lang === "en" ? project.title_en : project.title_uz
   const description = lang === "en" ? project.description_en : project.description_uz
+  const primaryHref = project.live_link?.trim() || ""
+  const githubHref = project.github_link?.trim() || ""
 
   return (
     <div className="group overflow-hidden rounded-lg border border-border bg-card transition-all duration-200 hover:border-foreground/20 hover:shadow-sm">
       {/* Image */}
       <div className="aspect-video bg-muted overflow-hidden">
-        {project.image_url ? (
+        {primaryHref ? (
+          <a
+            href={primaryHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={`${title} live preview`}
+            className="block h-full w-full cursor-pointer"
+          >
+            {project.image_url ? (
+              <Image
+                src={project.image_url}
+                alt={title}
+                width={640}
+                height={360}
+                className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
+              />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center">
+                <span className="text-sm text-muted-foreground">{t.common.image}</span>
+              </div>
+            )}
+          </a>
+        ) : project.image_url ? (
           <Image
             src={project.image_url}
             alt={title}
@@ -52,9 +76,9 @@ export function ProjectCard({ project }: { project: Project }) {
 
         {/* Links */}
         <div className="flex items-center gap-4 pt-1">
-          {project.live_link && (
+          {primaryHref && (
             <a
-              href={project.live_link}
+              href={primaryHref}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 text-sm text-foreground transition-colors hover:text-muted-foreground"
@@ -63,9 +87,9 @@ export function ProjectCard({ project }: { project: Project }) {
               {t.projects.liveLink}
             </a>
           )}
-          {project.github_link && (
+          {githubHref && (
             <a
-              href={project.github_link}
+              href={githubHref}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
