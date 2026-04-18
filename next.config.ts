@@ -1,7 +1,7 @@
 import type { NextConfig } from "next"
 
 const nextConfig: NextConfig = {
-  images: {
+s: {
     remotePatterns: [
       {
         protocol: "https",
