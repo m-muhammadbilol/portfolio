@@ -12,6 +12,11 @@ interface Props {
   settings: SiteSettings | null
 }
 
+const TABS = [
+  { id: "home", label: "Home" },
+  { id: "about", label: "About" },
+] as const
+
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
@@ -128,10 +133,10 @@ export function ContentManager({ content, settings }: Props) {
       <h1 className="text-lg font-semibold">Kontent</h1>
 
       <div className="flex border-b border-border">
-        {[{ id: "home", label: "Home" }, { id: "about", label: "About" }].map(t => (
+        {TABS.map(t => (
           <button
             key={t.id}
-            onClick={() => setTab(t.id as any)}
+            onClick={() => setTab(t.id)}
             className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${tab === t.id ? "border-foreground text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
           >
             {t.label}
@@ -199,12 +204,12 @@ export function ContentManager({ content, settings }: Props) {
             <Field label="Ingliz"><Textarea value={aboutForm.experience_en} onChange={setA("experience_en")} /></Field>
           </div>
           <div className="p-4 rounded-lg border border-border space-y-3">
-            <h2 className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Ta'lim</h2>
+            <h2 className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Ta&apos;lim</h2>
             <Field label="O'zbek"><Textarea value={aboutForm.education_uz} onChange={setA("education_uz")} /></Field>
             <Field label="Ingliz"><Textarea value={aboutForm.education_en} onChange={setA("education_en")} /></Field>
           </div>
           <div className="p-4 rounded-lg border border-border space-y-3">
-            <h2 className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Ko'nikmalar (vergul bilan)</h2>
+            <h2 className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Ko&apos;nikmalar (vergul bilan)</h2>
             <Field label="Bir xil ikki tilda"><Input value={aboutForm.skills} onChange={setA("skills")} placeholder="React, Next.js, TypeScript" /></Field>
           </div>
           <button onClick={saveAbout} disabled={saving} className="inline-flex items-center gap-2 px-4 py-2 text-sm rounded-md bg-foreground text-background hover:bg-foreground/90 transition-colors disabled:opacity-50">

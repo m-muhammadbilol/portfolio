@@ -75,7 +75,7 @@ export function ImageUpload({ value, onChange, bucket, path, label = "Rasm yukla
               className="flex items-center gap-2 px-3 py-2 text-xs font-medium bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
             >
               <X size={13} />
-              O'chirish
+              O&apos;chirish
             </button>
           </div>
         </div>

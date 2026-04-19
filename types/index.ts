@@ -56,3 +56,11 @@ export type CursorType =
 
 export type Language = 'uz' | 'en'
 export type Theme = 'light' | 'dark' | 'system'
+
+export interface Resume {
+  id: string
+  file_url: string
+  file_name: string
+  created_at: string
+  updated_at: string
+}
