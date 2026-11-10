@@ -8,6 +8,7 @@ export interface Project {
   live_link: string
   github_link: string
   tags: string[]
+  category?: string
   sort_order: number
   is_published: boolean
   created_at: string
@@ -25,7 +26,7 @@ export interface SiteContent {
 export interface SiteSettings {
   id: string
   active_cursor: string
-  default_theme: string
+  default_theme: Theme
   default_language: string
   social_instagram: string
   social_telegram: string

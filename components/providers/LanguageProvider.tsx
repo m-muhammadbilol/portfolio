@@ -14,15 +14,22 @@ interface LanguageContextType {
 }
 
 const LanguageContext = createContext<LanguageContextType>({
-  lang: "uz",
+  lang: "en",
   setLang: () => {},
-  t: uz,
+  t: en,
 })
 
-export function LanguageProvider({ children, defaultLang = "uz" }: { children: React.ReactNode; defaultLang?: Language }) {
+export function LanguageProvider({ children, defaultLang = "en" }: { children: React.ReactNode; defaultLang?: Language }) {
   const [lang, setLangState] = useState<Language>(defaultLang)
 
   useEffect(() => {
+    const previousDefault = localStorage.getItem("lang-default")
+    if (previousDefault !== defaultLang) {
+      localStorage.setItem("lang-default", defaultLang)
+      localStorage.setItem("lang", defaultLang)
+      return
+    }
+
     const saved = localStorage.getItem("lang") as Language | null
     if (saved !== "uz" && saved !== "en") return
 
@@ -31,7 +38,7 @@ export function LanguageProvider({ children, defaultLang = "uz" }: { children: R
     })
 
     return () => window.cancelAnimationFrame(frame)
-  }, [])
+  }, [defaultLang])
 
   const setLang = (l: Language) => {
     setLangState(l)

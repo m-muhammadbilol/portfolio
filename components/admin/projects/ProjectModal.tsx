@@ -4,7 +4,6 @@ import { useState } from "react"
 import { Loader2, X } from "lucide-react"
 import { toast } from "sonner"
 import { ImageUpload } from "@/components/shared/ImageUpload"
-import { createClient } from "@/lib/supabase/client"
 import type { Project } from "@/types"
 
 interface Props {
@@ -22,6 +21,7 @@ interface FormState {
   github_link: string
   tags: string
   sort_order: string
+  category: string
   is_published: boolean
 }
 
@@ -39,10 +39,9 @@ export function ProjectModal({ project, onClose, onSaved }: Props) {
     github_link: project?.github_link || "",
     tags: project?.tags?.join(", ") || "",
     sort_order: String(project?.sort_order ?? 0),
+    category: project?.category || "Web",
     is_published: project?.is_published ?? true,
   })
-
-  const supabase = createClient()
 
   const set = (key: keyof FormState) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setForm((prev) => ({ ...prev, [key]: e.target.value }))
@@ -68,28 +67,26 @@ export function ProjectModal({ project, onClose, onSaved }: Props) {
         live_link: form.live_link.trim(),
         github_link: form.github_link.trim(),
         tags: form.tags.split(",").map((t) => t.trim()).filter(Boolean),
+        category: form.category,
         sort_order: parseInt(form.sort_order || "0", 10),
         is_published: form.is_published,
         image_url: imageUrl,
         updated_at: new Date().toISOString(),
       }
 
-      if (project) {
-        const { error } = await supabase.from("projects").update(payload).eq("id", project.id)
-        if (error) throw error
-      } else {
-        const { error } = await supabase.from("projects").insert({
-          ...payload,
-          created_at: new Date().toISOString(),
-        })
-        if (error) throw error
-      }
+      const response = await fetch("/api/admin/manage", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "project.save", project: { ...payload, ...(project ? { id: project.id } : {}) } }),
+      })
+      const result = await response.json()
+      if (!response.ok) throw new Error(result.error || "Failed to save project")
 
       toast.success(project ? "Project updated" : "Project created")
       onSaved()
       onClose()
-    } catch {
-      toast.error("Failed to save project")
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to save project")
     } finally {
       setSaving(false)
     }
@@ -209,6 +206,20 @@ export function ProjectModal({ project, onClose, onSaved }: Props) {
                 className="h-11 w-full rounded-md border border-border bg-background px-4 text-base focus:outline-none focus:ring-1 focus:ring-ring"
               />
             </div>
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-medium text-muted-foreground">Category</label>
+            <select
+              value={form.category}
+              onChange={(e) => setForm((prev) => ({ ...prev, category: e.target.value }))}
+              className="h-11 w-full rounded-md border border-border bg-background px-4 text-base focus:outline-none focus:ring-1 focus:ring-ring"
+            >
+              <option value="Web">Web</option>
+              <option value="App">App</option>
+              <option value="Ads">Ads</option>
+              <option value="Design">Design</option>
+            </select>
           </div>
 
           {/* Published */}

@@ -3,7 +3,6 @@
 import { useState, useRef } from "react"
 import { Upload, Trash2, Loader2, FileText, Download } from "lucide-react"
 import { toast } from "sonner"
-import { createClient } from "@supabase/supabase-js"
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog"
 import type { Resume } from "@/types"
 
@@ -12,13 +11,6 @@ export function ResumeManager({ initialResume }: { initialResume: Resume | null 
   const [uploading, setUploading] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
-
-  function getClient() {
-    return createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    )
-  }
 
   const upload = async (file: File) => {
     if (file.type !== "application/pdf") {
@@ -32,45 +24,26 @@ export function ResumeManager({ initialResume }: { initialResume: Resume | null 
 
     setUploading(true)
     try {
-      const supabase = getClient()
-      const fileName = `resume-${Date.now()}.pdf`
-
-      const { error: uploadError } = await supabase.storage
-        .from("resume")
-        .upload(fileName, file, { upsert: true })
-
-      if (uploadError) throw uploadError
-
-      const { data } = supabase.storage.from("resume").getPublicUrl(fileName)
-
-      if (resume) {
-        const { data: updated } = await supabase
-          .from("resume")
-          .update({
-            file_url: data.publicUrl,
-            file_name: file.name,
-            updated_at: new Date().toISOString(),
-          })
-          .eq("id", resume.id)
-          .select()
-          .single()
-        if (updated) setResume(updated)
-      } else {
-        const { data: inserted } = await supabase
-          .from("resume")
-          .insert({
-            file_url: data.publicUrl,
-            file_name: file.name,
-          })
-          .select()
-          .single()
-        if (inserted) setResume(inserted)
-      }
+      const form = new FormData()
+      form.set("file", file)
+      form.set("bucket", "resume")
+      form.set("path", "resume")
+      const uploadResponse = await fetch("/api/admin/upload", { method: "POST", body: form })
+      const uploaded = await uploadResponse.json()
+      if (!uploadResponse.ok) throw new Error(uploaded.error || "Upload failed")
+      const saveResponse = await fetch("/api/admin/manage", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "resume.save", file_url: uploaded.url, file_name: file.name }),
+      })
+      const saved = await saveResponse.json()
+      if (!saveResponse.ok) throw new Error(saved.error || "Could not save resume")
+      setResume(saved.resume)
 
       toast.success("Resume yuklandi!")
     } catch (err) {
       console.error(err)
-      toast.error("Yuklashda xato")
+      toast.error(err instanceof Error ? err.message : "Yuklashda xato")
     } finally {
       setUploading(false)
     }
@@ -79,12 +52,13 @@ export function ResumeManager({ initialResume }: { initialResume: Resume | null 
   const handleDelete = async () => {
     if (!resume) return
     try {
-      const supabase = getClient()
-      await supabase.from("resume").delete().eq("id", resume.id)
+      const response = await fetch("/api/admin/manage", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "resume.delete", id: resume.id }) })
+      const result = await response.json()
+      if (!response.ok) throw new Error(result.error || "Could not delete resume")
       setResume(null)
       toast.success("Resume ochirildi")
-    } catch {
-      toast.error("Ochirshda xato")
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Ochirshda xato")
     }
   }
 

@@ -4,7 +4,6 @@ import { useState } from "react"
 import { Loader2 } from "lucide-react"
 import { toast } from "sonner"
 import { ImageUpload } from "@/components/shared/ImageUpload"
-import { createClient } from "@supabase/supabase-js"
 import type { SiteContent, SiteSettings } from "@/types"
 
 interface Props {
@@ -63,31 +62,16 @@ export function ContentManager({ content, settings }: Props) {
     skills: content["about_skills"]?.value_uz || "React,Next.js,TypeScript,Tailwind CSS",
   })
 
-  function getClient() {
-    return createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    )
-  }
-
-  const upsertContent = async (key: string, uz: string, en: string) => {
-    const supabase = getClient()
-    const existing = content[key]
-    if (existing) {
-      await supabase.from("site_content").update({ value_uz: uz, value_en: en, updated_at: new Date().toISOString() }).eq("key", key)
-    } else {
-      await supabase.from("site_content").insert({ key, value_uz: uz, value_en: en, type: "text" })
-    }
-  }
-
   const saveHome = async () => {
     setSaving(true)
     try {
-      await upsertContent("home_title", homeForm.title_uz, homeForm.title_en)
-      await upsertContent("home_subtitle", homeForm.subtitle_uz, homeForm.subtitle_en)
-      const supabase = getClient()
-      if (settings?.id) {
-        await supabase.from("site_settings").update({
+      const response = await fetch("/api/admin/manage", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "content.save", content: [
+          { key: "home_title", value_uz: homeForm.title_uz, value_en: homeForm.title_en },
+          { key: "home_subtitle", value_uz: homeForm.subtitle_uz, value_en: homeForm.subtitle_en },
+        ], settings: {
           social_github: homeForm.github,
           social_telegram: homeForm.telegram,
           social_instagram: homeForm.instagram,
@@ -97,11 +81,13 @@ export function ContentManager({ content, settings }: Props) {
           social_linkedin: homeForm.linkedin,
           home_image_url: homeImage,
           updated_at: new Date().toISOString(),
-        }).eq("id", settings.id)
-      }
+        } }),
+      })
+      const result = await response.json()
+      if (!response.ok) throw new Error(result.error || "Save failed")
       toast.success("Saqlandi!")
-    } catch {
-      toast.error("Xato yuz berdi")
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Xato yuz berdi")
     } finally {
       setSaving(false)
     }
@@ -110,13 +96,21 @@ export function ContentManager({ content, settings }: Props) {
   const saveAbout = async () => {
     setSaving(true)
     try {
-      await upsertContent("about_bio", aboutForm.bio_uz, aboutForm.bio_en)
-      await upsertContent("about_experience", aboutForm.experience_uz, aboutForm.experience_en)
-      await upsertContent("about_education", aboutForm.education_uz, aboutForm.education_en)
-      await upsertContent("about_skills", aboutForm.skills, aboutForm.skills)
+      const response = await fetch("/api/admin/manage", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "content.save", content: [
+          { key: "about_bio", value_uz: aboutForm.bio_uz, value_en: aboutForm.bio_en },
+          { key: "about_experience", value_uz: aboutForm.experience_uz, value_en: aboutForm.experience_en },
+          { key: "about_education", value_uz: aboutForm.education_uz, value_en: aboutForm.education_en },
+          { key: "about_skills", value_uz: aboutForm.skills, value_en: aboutForm.skills },
+        ] }),
+      })
+      const result = await response.json()
+      if (!response.ok) throw new Error(result.error || "Save failed")
       toast.success("Saqlandi!")
-    } catch {
-      toast.error("Xato yuz berdi")
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Xato yuz berdi")
     } finally {
       setSaving(false)
     }

@@ -7,9 +7,8 @@ import { z } from "zod"
 import { Loader2 } from "lucide-react"
 import { toast } from "sonner"
 import { useTheme } from "next-themes"
-import { createClient } from "@/lib/supabase/client"
 import { useCursorContext } from "@/components/providers/CursorProvider"
-import type { SiteSettings, CursorType } from "@/types"
+import type { CursorType } from "@/types"
 
 const cursors: { id: CursorType; label: string }[] = [
   { id: "dot", label: "Dot" },
@@ -35,23 +34,24 @@ const passwordSchema = z.object({
   confirmPassword: z.string().min(1, "Required"),
 }).refine(d => d.newPassword === d.confirmPassword, { message: "Passwords don't match", path: ["confirmPassword"] })
 
-export function SettingsManager({ settings }: { settings: SiteSettings | null }) {
+export function SettingsManager() {
   const { setCursorType, cursorType } = useCursorContext()
   const { theme, setTheme } = useTheme()
-  const supabase = createClient()
   const [savingCursor, setSavingCursor] = useState(false)
 
   const unameForm = useForm({ resolver: zodResolver(usernameSchema), defaultValues: { newUsername: "", currentPassword: "" } })
   const passForm = useForm({ resolver: zodResolver(passwordSchema), defaultValues: { currentPassword: "", newPassword: "", confirmPassword: "" } })
 
   const saveCursor = async (cursor: CursorType) => {
-    setCursorType(cursor)
     setSavingCursor(true)
     try {
-      if (settings?.id) {
-        await supabase.from("site_settings").update({ active_cursor: cursor, updated_at: new Date().toISOString() }).eq("id", settings.id)
-      }
+      const response = await fetch("/api/admin/manage", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "settings.cursor", cursor }) })
+      const result = await response.json()
+      if (!response.ok) throw new Error(result.error || "Save failed")
+      setCursorType(cursor)
       toast.success("Cursor updated")
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Cursor update failed")
     } finally {
       setSavingCursor(false)
     }
@@ -91,7 +91,14 @@ export function SettingsManager({ settings }: { settings: SiteSettings | null })
           {["light", "dark", "system"].map(t => (
             <button
               key={t}
-              onClick={() => setTheme(t)}
+              onClick={async () => {
+                setTheme(t)
+                const response = await fetch("/api/admin/manage", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "settings.theme", theme: t }) })
+                if (!response.ok) {
+                  const result = await response.json()
+                  toast.error(result.error || "Theme preference was not saved")
+                }
+              }}
               className={`rounded-md border px-4 py-2 text-sm capitalize transition-colors ${theme === t ? "border-foreground bg-foreground text-background" : "border-border text-muted-foreground hover:text-foreground"}`}
             >
               {t}

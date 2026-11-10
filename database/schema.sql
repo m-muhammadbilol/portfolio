@@ -22,10 +22,14 @@ CREATE TABLE IF NOT EXISTS site_settings (
   id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   active_cursor     TEXT DEFAULT 'dot',
   default_theme     TEXT DEFAULT 'system',
-  default_language  TEXT DEFAULT 'uz',
+  default_language  TEXT DEFAULT 'en',
   social_instagram  TEXT DEFAULT '',
   social_telegram   TEXT DEFAULT '',
   social_github     TEXT DEFAULT '',
+  social_youtube    TEXT DEFAULT '',
+  social_facebook   TEXT DEFAULT '',
+  social_twitter    TEXT DEFAULT '',
+  social_linkedin   TEXT DEFAULT '',
   home_image_url    TEXT DEFAULT '',
   created_at        TIMESTAMPTZ DEFAULT now(),
   updated_at        TIMESTAMPTZ DEFAULT now()
@@ -51,6 +55,7 @@ CREATE TABLE IF NOT EXISTS projects (
   live_link       TEXT DEFAULT '',
   github_link     TEXT DEFAULT '',
   tags            TEXT[] DEFAULT '{}',
+  category        TEXT NOT NULL DEFAULT 'Web',
   sort_order      INT DEFAULT 0,
   is_published    BOOLEAN DEFAULT true,
   created_at      TIMESTAMPTZ DEFAULT now(),
@@ -76,7 +81,7 @@ ON CONFLICT (username) DO NOTHING;
 
 -- Site settings (single row)
 INSERT INTO site_settings (active_cursor, default_theme, default_language, social_github)
-VALUES ('dot', 'system', 'uz', 'https://github.com/muhammadbilol')
+VALUES ('dot', 'system', 'en', 'https://github.com/muhammadbilol')
 ON CONFLICT DO NOTHING;
 
 -- Default content

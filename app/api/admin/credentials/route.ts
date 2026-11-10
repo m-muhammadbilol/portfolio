@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { createClient } from "@/lib/supabase/server"
+import { createAdminClient } from "@/lib/supabase/admin"
 import { requireAdmin, signToken, COOKIE_NAME, COOKIE_OPTIONS } from "@/lib/auth"
 import bcrypt from "bcryptjs"
 import { z } from "zod"
@@ -19,7 +19,7 @@ export async function POST(request: Request) {
     const body = await request.json()
     const { type, currentPassword, newUsername, newPassword } = schema.parse(body)
 
-    const supabase = await createClient()
+    const supabase = createAdminClient()
     const { data: user } = await supabase
       .from("admin_users")
       .select("id, username, password_hash")
@@ -32,7 +32,8 @@ export async function POST(request: Request) {
     if (!valid) return NextResponse.json({ error: "Wrong current password" }, { status: 401 })
 
     if (type === "username" && newUsername) {
-      await supabase.from("admin_users").update({ username: newUsername, updated_at: new Date().toISOString() }).eq("id", session.id)
+      const { error } = await supabase.from("admin_users").update({ username: newUsername, updated_at: new Date().toISOString() }).eq("id", session.id)
+      if (error) return NextResponse.json({ error: error.message }, { status: 400 })
       const token = await signToken({ id: session.id, username: newUsername })
       const response = NextResponse.json({ success: true })
       response.cookies.set(COOKIE_NAME, token, COOKIE_OPTIONS)
@@ -41,7 +42,8 @@ export async function POST(request: Request) {
 
     if (type === "password" && newPassword) {
       const hash = await bcrypt.hash(newPassword, 12)
-      await supabase.from("admin_users").update({ password_hash: hash, updated_at: new Date().toISOString() }).eq("id", session.id)
+      const { error } = await supabase.from("admin_users").update({ password_hash: hash, updated_at: new Date().toISOString() }).eq("id", session.id)
+      if (error) return NextResponse.json({ error: error.message }, { status: 400 })
       return NextResponse.json({ success: true })
     }
 

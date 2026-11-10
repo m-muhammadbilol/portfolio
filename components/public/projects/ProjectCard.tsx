@@ -14,7 +14,7 @@ export function ProjectCard({ project }: { project: Project }) {
   const githubHref = project.github_link?.trim() || ""
 
   return (
-    <div className="group overflow-hidden rounded-lg border border-border bg-card transition-all duration-200 hover:border-foreground/20 hover:shadow-sm">
+    <div className="group flex h-full flex-col overflow-hidden rounded-lg border border-border bg-card transition-all duration-200 hover:border-foreground/20 hover:shadow-sm">
       {/* Image */}
       <div className="aspect-video bg-muted overflow-hidden">
         {primaryHref ? (
@@ -31,6 +31,8 @@ export function ProjectCard({ project }: { project: Project }) {
                 alt={title}
                 width={640}
                 height={360}
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                quality={75}
                 className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
               />
             ) : (
@@ -45,6 +47,8 @@ export function ProjectCard({ project }: { project: Project }) {
             alt={title}
             width={640}
             height={360}
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            quality={75}
             className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
           />
         ) : (
@@ -54,14 +58,12 @@ export function ProjectCard({ project }: { project: Project }) {
         )}
       </div>
 
-      <div className="space-y-4 p-5">
+      <div className="flex flex-1 flex-col gap-4 p-5">
         {/* Title */}
         <h3 className="line-clamp-2 text-lg font-medium leading-snug sm:text-xl">{title}</h3>
 
         {/* Description */}
-        {description && (
-          <p className="line-clamp-3 text-sm leading-7 text-muted-foreground sm:text-base">{description}</p>
-        )}
+        <p className="line-clamp-3 min-h-[4.5rem] text-sm leading-6 text-muted-foreground sm:text-base">{description || t.projects.noDescription}</p>
 
         {/* Tags */}
         {project.tags?.length > 0 && (
@@ -75,7 +77,7 @@ export function ProjectCard({ project }: { project: Project }) {
         )}
 
         {/* Links */}
-        <div className="flex items-center gap-4 pt-1">
+        <div className="mt-auto flex items-center gap-4 pt-1">
           {primaryHref && (
             <a
               href={primaryHref}

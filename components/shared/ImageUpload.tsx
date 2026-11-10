@@ -3,7 +3,6 @@
 import { useState, useRef } from "react"
 import { Upload, X, Loader2, RefreshCw } from "lucide-react"
 import Image from "next/image"
-import { createClient } from "@supabase/supabase-js"
 import { toast } from "sonner"
 
 interface ImageUploadProps {
@@ -24,22 +23,18 @@ export function ImageUpload({ value, onChange, bucket, path, label = "Rasm yukla
 
     setUploading(true)
     try {
-      const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      )
-      const ext = file.name.split(".").pop()
-      const fileName = `${path}-${Date.now()}.${ext}`
-      const { error: uploadError } = await supabase.storage
-        .from(bucket)
-        .upload(fileName, file, { upsert: true })
-      if (uploadError) throw uploadError
-      const { data } = supabase.storage.from(bucket).getPublicUrl(fileName)
-      onChange(data.publicUrl)
+      const form = new FormData()
+      form.set("file", file)
+      form.set("bucket", bucket)
+      form.set("path", path)
+      const response = await fetch("/api/admin/upload", { method: "POST", body: form })
+      const result = await response.json()
+      if (!response.ok) throw new Error(result.error || "Upload failed")
+      onChange(result.url)
       toast.success("Rasm yuklandi!")
     } catch (err) {
       console.error(err)
-      toast.error("Yuklash xato ketdi")
+      toast.error(err instanceof Error ? err.message : "Yuklash xato ketdi")
     } finally {
       setUploading(false)
     }

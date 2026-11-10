@@ -5,15 +5,7 @@ import { Plus, Pencil, Trash2, Eye, EyeOff } from "lucide-react"
 import { toast } from "sonner"
 import { ProjectModal } from "./ProjectModal"
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog"
-import { createClient } from "@supabase/supabase-js"
 import type { Project } from "@/types"
-
-function getClient() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
-}
 
 export function ProjectsManager({ initialProjects }: { initialProjects: Project[] }) {
   const [projects, setProjects] = useState<Project[]>(initialProjects)
@@ -22,27 +14,28 @@ export function ProjectsManager({ initialProjects }: { initialProjects: Project[
   const [deleteId, setDeleteId] = useState<string | null>(null)
 
   const refresh = async () => {
-    const supabase = getClient()
-    const { data } = await supabase.from("projects").select("*").order("sort_order").order("created_at", { ascending: false })
-    if (data) setProjects(data)
+    const response = await fetch("/api/admin/projects")
+    const { projects: data, error } = await response.json()
+    if (!response.ok) { toast.error(error || "Loyihalarni yuklab bo'lmadi"); return }
+    setProjects(data || [])
   }
 
   const handleDelete = async () => {
     if (!deleteId) return
-    const supabase = getClient()
-    const { error } = await supabase.from("projects").delete().eq("id", deleteId)
-    if (error) { toast.error("O'chirishda xato"); return }
+    const response = await fetch("/api/admin/manage", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "project.delete", id: deleteId }) })
+    const result = await response.json()
+    if (!response.ok) { toast.error(result.error || "O'chirishda xato"); return }
     toast.success("Loyiha o'chirildi")
     setDeleteId(null)
     refresh()
   }
 
   const togglePublish = async (project: Project) => {
-    const supabase = getClient()
-    const { error } = await supabase.from("projects").update({ is_published: !project.is_published }).eq("id", project.id)
-    if (!error) {
-      setProjects(prev => prev.map(p => p.id === project.id ? { ...p, is_published: !p.is_published } : p))
-    }
+    const is_published = !project.is_published
+    const response = await fetch("/api/admin/manage", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "project.publish", id: project.id, is_published }) })
+    const result = await response.json()
+    if (!response.ok) { toast.error(result.error || "Holatni o'zgartirib bo'lmadi"); return }
+    setProjects(prev => prev.map(p => p.id === project.id ? { ...p, is_published } : p))
   }
 
   return (
@@ -72,6 +65,7 @@ export function ProjectsManager({ initialProjects }: { initialProjects: Project[
               <tr className="border-b border-border bg-muted/40">
                 <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Sarlavha</th>
                 <th className="hidden px-4 py-3 text-left text-sm font-medium text-muted-foreground sm:table-cell">Teglar</th>
+                <th className="hidden px-4 py-3 text-left text-sm font-medium text-muted-foreground lg:table-cell">Kategoriya</th>
                 <th className="hidden px-4 py-3 text-left text-sm font-medium text-muted-foreground md:table-cell">Holat</th>
                 <th className="px-4 py-2.5 w-24"></th>
               </tr>
@@ -90,6 +84,7 @@ export function ProjectsManager({ initialProjects }: { initialProjects: Project[
                       ))}
                     </div>
                   </td>
+                  <td className="hidden px-4 py-3 capitalize text-muted-foreground lg:table-cell">{project.category || "Web"}</td>
                   <td className="px-4 py-3 hidden md:table-cell">
                     <span className={`rounded-full border px-2.5 py-1 text-xs ${project.is_published ? "border-foreground/20 text-foreground" : "border-border text-muted-foreground"}`}>
                       {project.is_published ? "Chop etilgan" : "Qoralama"}
