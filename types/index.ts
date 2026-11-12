@@ -5,10 +5,12 @@ export interface Project {
   description_uz: string
   description_en: string
   image_url: string
+  image_urls?: string[]
   live_link: string
   github_link: string
   tags: string[]
   category?: string
+  category_details?: Record<string, string>
   sort_order: number
   is_published: boolean
   created_at: string

@@ -9,7 +9,9 @@ const projectSchema = z.object({
   title_uz: z.string().min(1), title_en: z.string().min(1),
   description_uz: z.string(), description_en: z.string(),
   live_link: z.string(), github_link: z.string(), image_url: z.string(),
+  image_urls: z.array(z.string().url()).max(12),
   tags: z.array(z.string()), category: z.enum(["Web", "App", "Ads", "Design"]),
+  category_details: z.record(z.string(), z.string().max(500)),
   sort_order: z.number().int(), is_published: z.boolean(),
 })
 

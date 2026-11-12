@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { Loader2, X } from "lucide-react"
 import { toast } from "sonner"
-import { ImageUpload } from "@/components/shared/ImageUpload"
+import { ProjectImageGallery } from "./ProjectImageGallery"
 import type { Project } from "@/types"
 
 interface Props {
@@ -26,7 +26,8 @@ interface FormState {
 }
 
 export function ProjectModal({ project, onClose, onSaved }: Props) {
-  const [imageUrl, setImageUrl] = useState(project?.image_url || "")
+  const [imageUrls, setImageUrls] = useState<string[]>(project?.image_urls?.length ? project.image_urls : project?.image_url ? [project.image_url] : [])
+  const [categoryDetails, setCategoryDetails] = useState<Record<string, string>>(project?.category_details || {})
   const [saving, setSaving] = useState(false)
   const [errors, setErrors] = useState<Partial<Record<keyof FormState, string>>>({})
 
@@ -45,6 +46,9 @@ export function ProjectModal({ project, onClose, onSaved }: Props) {
 
   const set = (key: keyof FormState) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setForm((prev) => ({ ...prev, [key]: e.target.value }))
+
+  const setDetail = (key: string, value: string) =>
+    setCategoryDetails((previous) => ({ ...previous, [key]: value }))
 
   const validate = (): boolean => {
     const errs: Partial<Record<keyof FormState, string>> = {}
@@ -68,9 +72,11 @@ export function ProjectModal({ project, onClose, onSaved }: Props) {
         github_link: form.github_link.trim(),
         tags: form.tags.split(",").map((t) => t.trim()).filter(Boolean),
         category: form.category,
+        category_details: categoryDetails,
         sort_order: parseInt(form.sort_order || "0", 10),
         is_published: form.is_published,
-        image_url: imageUrl,
+        image_urls: imageUrls,
+        image_url: imageUrls[0] || "",
         updated_at: new Date().toISOString(),
       }
 
@@ -112,12 +118,7 @@ export function ProjectModal({ project, onClose, onSaved }: Props) {
           {/* Image */}
           <div>
             <label className="mb-2 block text-sm font-medium text-muted-foreground">Image</label>
-            <ImageUpload
-              value={imageUrl}
-              onChange={setImageUrl}
-              bucket="projects"
-              path={`project-${Date.now()}`}
-            />
+            <ProjectImageGallery images={imageUrls} onChange={setImageUrls} />
           </div>
 
           {/* Titles */}
@@ -164,50 +165,6 @@ export function ProjectModal({ project, onClose, onSaved }: Props) {
             </div>
           </div>
 
-          {/* Links */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="mb-2 block text-sm font-medium text-muted-foreground">Live Link</label>
-              <input
-                value={form.live_link}
-                onChange={set("live_link")}
-                placeholder="https://"
-                className="h-11 w-full rounded-md border border-border bg-background px-4 text-base focus:outline-none focus:ring-1 focus:ring-ring"
-              />
-            </div>
-            <div>
-              <label className="mb-2 block text-sm font-medium text-muted-foreground">GitHub Link</label>
-              <input
-                value={form.github_link}
-                onChange={set("github_link")}
-                placeholder="https://github.com/..."
-                className="h-11 w-full rounded-md border border-border bg-background px-4 text-base focus:outline-none focus:ring-1 focus:ring-ring"
-              />
-            </div>
-          </div>
-
-          {/* Tags + Order */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="mb-2 block text-sm font-medium text-muted-foreground">Tags (comma separated)</label>
-              <input
-                value={form.tags}
-                onChange={set("tags")}
-                placeholder="React, Next.js, TypeScript"
-                className="h-11 w-full rounded-md border border-border bg-background px-4 text-base focus:outline-none focus:ring-1 focus:ring-ring"
-              />
-            </div>
-            <div>
-              <label className="mb-2 block text-sm font-medium text-muted-foreground">Sort Order</label>
-              <input
-                value={form.sort_order}
-                onChange={set("sort_order")}
-                type="number"
-                className="h-11 w-full rounded-md border border-border bg-background px-4 text-base focus:outline-none focus:ring-1 focus:ring-ring"
-              />
-            </div>
-          </div>
-
           <div>
             <label className="mb-2 block text-sm font-medium text-muted-foreground">Category</label>
             <select
@@ -220,6 +177,76 @@ export function ProjectModal({ project, onClose, onSaved }: Props) {
               <option value="Ads">Ads</option>
               <option value="Design">Design</option>
             </select>
+          </div>
+
+          {form.category === "Ads" ? (
+            <div className="space-y-4 rounded-md border border-border p-4">
+              <h3 className="text-sm font-medium">Ad campaign details</h3>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="mb-2 block text-sm text-muted-foreground">Platform</label>
+                  <select value={categoryDetails.platform || "Meta Ads"} onChange={(e) => setDetail("platform", e.target.value)} className="h-11 w-full rounded-md border border-border bg-background px-4 text-base">
+                    <option>Meta Ads</option><option>Google Ads</option><option>TikTok Ads</option><option>LinkedIn Ads</option><option>Other</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-2 block text-sm text-muted-foreground">Ad format</label>
+                  <input value={categoryDetails.format || ""} onChange={(e) => setDetail("format", e.target.value)} placeholder="Video, banner, carousel..." className="h-11 w-full rounded-md border border-border bg-background px-4 text-base" />
+                </div>
+              </div>
+              <div>
+                <label className="mb-2 block text-sm text-muted-foreground">Campaign objective</label>
+                <input value={categoryDetails.objective || ""} onChange={(e) => setDetail("objective", e.target.value)} placeholder="Leads, sales, awareness..." className="h-11 w-full rounded-md border border-border bg-background px-4 text-base" />
+              </div>
+              <div>
+                <label className="mb-2 block text-sm text-muted-foreground">Campaign link (optional)</label>
+                <input value={categoryDetails.campaign_url || ""} onChange={(e) => setDetail("campaign_url", e.target.value)} placeholder="https://" className="h-11 w-full rounded-md border border-border bg-background px-4 text-base" />
+              </div>
+              <div>
+                <label className="mb-2 block text-sm text-muted-foreground">Result (optional)</label>
+                <input value={categoryDetails.result || ""} onChange={(e) => setDetail("result", e.target.value)} placeholder="e.g. 2.4x ROAS" className="h-11 w-full rounded-md border border-border bg-background px-4 text-base" />
+              </div>
+            </div>
+          ) : form.category === "Design" ? (
+            <div className="space-y-4 rounded-md border border-border p-4">
+              <h3 className="text-sm font-medium">Design project details</h3>
+              <div>
+                <label className="mb-2 block text-sm text-muted-foreground">Design tool</label>
+                <select value={categoryDetails.tool || "Figma"} onChange={(e) => setDetail("tool", e.target.value)} className="h-11 w-full rounded-md border border-border bg-background px-4 text-base">
+                  <option>Figma</option><option>Adobe XD</option><option>Photoshop</option><option>Illustrator</option><option>Other</option>
+                </select>
+              </div>
+              <div>
+                <label className="mb-2 block text-sm text-muted-foreground">Design preview link (optional)</label>
+                <input value={categoryDetails.preview_url || ""} onChange={(e) => setDetail("preview_url", e.target.value)} placeholder="https://" className="h-11 w-full rounded-md border border-border bg-background px-4 text-base" />
+              </div>
+              <div>
+                <label className="mb-2 block text-sm text-muted-foreground">Deliverables</label>
+                <input value={categoryDetails.deliverables || ""} onChange={(e) => setDetail("deliverables", e.target.value)} placeholder="Brand identity, UI kit, landing page..." className="h-11 w-full rounded-md border border-border bg-background px-4 text-base" />
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-muted-foreground">{form.category === "App" ? "App / Demo Link" : "Website Link"}</label>
+                  <input value={form.live_link} onChange={set("live_link")} placeholder="https://" className="h-11 w-full rounded-md border border-border bg-background px-4 text-base" />
+                </div>
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-muted-foreground">Repository Link</label>
+                  <input value={form.github_link} onChange={set("github_link")} placeholder="https://github.com/..." className="h-11 w-full rounded-md border border-border bg-background px-4 text-base" />
+                </div>
+              </div>
+              <div>
+                <label className="mb-2 block text-sm font-medium text-muted-foreground">{form.category === "App" ? "Technologies" : "Tech Stack"} (comma separated)</label>
+                <input value={form.tags} onChange={set("tags")} placeholder="React, Next.js, TypeScript" className="h-11 w-full rounded-md border border-border bg-background px-4 text-base" />
+              </div>
+            </div>
+          )}
+
+          <div>
+            <label className="mb-2 block text-sm font-medium text-muted-foreground">Sort Order</label>
+            <input value={form.sort_order} onChange={set("sort_order")} type="number" className="h-11 w-full rounded-md border border-border bg-background px-4 text-base" />
           </div>
 
           {/* Published */}
