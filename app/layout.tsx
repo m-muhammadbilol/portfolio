@@ -7,6 +7,7 @@ import { CustomCursor } from "@/components/shared/CustomCursor"
 import { createClient } from "@supabase/supabase-js"
 import { unstable_cache } from "next/cache"
 import type { CursorType, Language, Theme } from "@/types"
+import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 
 export const metadata: Metadata = {
@@ -63,6 +64,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             </CursorProvider>
           </LanguageProvider>
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   )
