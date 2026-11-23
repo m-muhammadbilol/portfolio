@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react"
 import type { MouseEvent, TouchEvent } from "react"
 import Image from "next/image"
-import { ChevronLeft, ChevronRight, ExternalLink, GitBranch } from "lucide-react"
+import { ChevronLeft, ChevronRight, Code2, ExternalLink, GitBranch, Megaphone, Palette, Smartphone } from "lucide-react"
 import { useLanguage } from "@/components/providers/LanguageProvider"
 import type { Project } from "@/types"
 
@@ -23,12 +23,20 @@ export function ProjectCard({ project }: { project: Project }) {
       ? project.category_details?.preview_url?.trim() || project.live_link?.trim() || ""
       : project.live_link?.trim() || ""
   const githubHref = category === "Web" || category === "App" ? project.github_link?.trim() || "" : ""
-  const categoryBadge = ({
-    Web: "bg-blue-600/90 text-white",
-    App: "bg-violet-600/90 text-white",
-    Ads: "bg-amber-500/95 text-black",
-    Design: "bg-pink-600/90 text-white",
-  } as Record<string, string>)[category] || "bg-background/90 text-foreground"
+  const badgeStyles: Record<string, { className: string; Icon: typeof Code2; label: string }> = {
+    Web: { className: "border-sky-300/30 bg-sky-950/80 text-sky-100", Icon: Code2, label: "Web" },
+    App: { className: "border-violet-300/30 bg-violet-950/80 text-violet-100", Icon: Smartphone, label: "App" },
+    Ads: { className: "border-amber-300/40 bg-amber-400/95 text-amber-950", Icon: Megaphone, label: "Ads" },
+    Design: { className: "border-fuchsia-300/30 bg-fuchsia-950/80 text-fuchsia-100", Icon: Palette, label: "Design" },
+  }
+  const badge = badgeStyles[category] || badgeStyles.Web
+  const categoryHighlights = category === "Web"
+    ? [project.category_details?.project_type]
+    : category === "App"
+      ? [project.category_details?.app_type, project.category_details?.app_platform || project.category_details?.platform]
+      : category === "Ads"
+        ? [project.category_details?.platform, project.category_details?.format, project.category_details?.result]
+        : [project.category_details?.design_type, project.category_details?.tool, project.category_details?.deliverables]
 
   useEffect(() => {
     if (images.length < 2) return
@@ -98,8 +106,9 @@ export function ProjectCard({ project }: { project: Project }) {
             <span className="text-sm text-muted-foreground">{t.common.image}</span>
           </div>
         )}
-        <span className={`absolute left-3 top-3 rounded-full px-3 py-1 text-xs font-semibold shadow-sm backdrop-blur ${categoryBadge}`}>
-          {category}
+        <span className={`absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold shadow-lg backdrop-blur-md ${badge.className}`}>
+          <badge.Icon size={13} strokeWidth={2.2} aria-hidden="true" />
+          {badge.label}
         </span>
       </div>
 
@@ -111,20 +120,18 @@ export function ProjectCard({ project }: { project: Project }) {
         <p className="line-clamp-3 min-h-[4.5rem] text-sm leading-6 text-muted-foreground sm:text-base">{description || t.projects.noDescription}</p>
 
         {/* Tags */}
-        {(project.tags?.length > 0 || project.category_details?.platform || project.category_details?.tool || project.category_details?.format) && (
+        {(project.tags?.length > 0 || categoryHighlights.some((value) => Boolean(value?.trim()))) && (
           <div className="flex flex-wrap gap-2">
+            {categoryHighlights.filter((value): value is string => Boolean(value?.trim())).slice(0, 2).map((value) => (
+              <span key={`category-${value}`} className="rounded-full border border-foreground/15 bg-foreground/[0.04] px-2.5 py-1 text-xs font-medium text-foreground/75 sm:text-sm">
+                {value}
+              </span>
+            ))}
             {project.tags?.slice(0, 4).map(tag => (
               <span key={tag} className="rounded-full border border-border px-2.5 py-1 text-xs text-muted-foreground sm:text-sm">
                 {tag}
               </span>
             ))}
-            {[project.category_details?.platform, project.category_details?.tool, project.category_details?.format]
-              .filter((value): value is string => Boolean(value?.trim()))
-              .map((value) => (
-                <span key={value} className="rounded-full border border-border px-2.5 py-1 text-xs text-muted-foreground sm:text-sm">
-                  {value}
-                </span>
-              ))}
           </div>
         )}
 

@@ -28,6 +28,18 @@ interface FormState {
 export function ProjectModal({ project, onClose, onSaved }: Props) {
   const [imageUrls, setImageUrls] = useState<string[]>(project?.image_urls?.length ? project.image_urls : project?.image_url ? [project.image_url] : [])
   const [categoryDetails, setCategoryDetails] = useState<Record<string, string>>(project?.category_details || {})
+  const categoryDetailKeys: Record<string, string[]> = {
+    Web: ["project_type"],
+    App: ["app_type", "app_platform"],
+    Ads: ["platform", "format", "objective", "campaign_url", "result"],
+    Design: ["design_type", "tool", "preview_url", "deliverables"],
+  }
+  const categoryDetailDefaults: Record<string, Record<string, string>> = {
+    Web: { project_type: "Landing page" },
+    App: { app_type: "Web app" },
+    Ads: { platform: "Meta Ads" },
+    Design: { design_type: "Brand identity", tool: "Figma" },
+  }
   const [saving, setSaving] = useState(false)
   const [errors, setErrors] = useState<Partial<Record<keyof FormState, string>>>({})
 
@@ -72,7 +84,10 @@ export function ProjectModal({ project, onClose, onSaved }: Props) {
         github_link: form.github_link.trim(),
         tags: form.tags.split(",").map((t) => t.trim()).filter(Boolean),
         category: form.category,
-        category_details: categoryDetails,
+        category_details: Object.fromEntries((categoryDetailKeys[form.category] || []).flatMap((key) => {
+          const value = categoryDetails[key] || categoryDetailDefaults[form.category]?.[key] || ""
+          return value ? [[key, value] as const] : []
+        })),
         sort_order: parseInt(form.sort_order || "0", 10),
         is_published: form.is_published,
         image_urls: imageUrls,
@@ -169,7 +184,7 @@ export function ProjectModal({ project, onClose, onSaved }: Props) {
             <label className="mb-2 block text-sm font-medium text-muted-foreground">Category</label>
             <select
               value={form.category}
-              onChange={(e) => setForm((prev) => ({ ...prev, category: e.target.value }))}
+              onChange={(e) => { setForm((prev) => ({ ...prev, category: e.target.value })); setCategoryDetails((previous) => Object.fromEntries(Object.entries(previous).filter(([key]) => (categoryDetailKeys[e.target.value] || []).includes(key)))) }}
               className="h-11 w-full rounded-md border border-border bg-background px-4 text-base focus:outline-none focus:ring-1 focus:ring-ring"
             >
               <option value="Web">Web</option>
@@ -208,39 +223,28 @@ export function ProjectModal({ project, onClose, onSaved }: Props) {
               </div>
             </div>
           ) : form.category === "Design" ? (
-            <div className="space-y-4 rounded-md border border-border p-4">
-              <h3 className="text-sm font-medium">Design project details</h3>
-              <div>
-                <label className="mb-2 block text-sm text-muted-foreground">Design tool</label>
-                <select value={categoryDetails.tool || "Figma"} onChange={(e) => setDetail("tool", e.target.value)} className="h-11 w-full rounded-md border border-border bg-background px-4 text-base">
-                  <option>Figma</option><option>Adobe XD</option><option>Photoshop</option><option>Illustrator</option><option>Other</option>
-                </select>
+            <div className="space-y-4 rounded-md border border-border bg-muted/20 p-4">
+              <div><h3 className="text-sm font-semibold">Graphic & UI design details</h3><p className="mt-1 text-xs text-muted-foreground">Show what you designed, which tools you used, and what you delivered.</p></div>
+              <div className="grid grid-cols-2 gap-3">
+                <div><label className="mb-2 block text-sm text-muted-foreground">Design type</label><select value={categoryDetails.design_type || "Brand identity"} onChange={(e) => setDetail("design_type", e.target.value)} className="h-11 w-full rounded-md border border-border bg-background px-4 text-base"><option>Brand identity</option><option>Social media graphics</option><option>Ad creative</option><option>UI/UX design</option><option>Logo design</option><option>Print design</option><option>Illustration</option><option>Other</option></select></div>
+                <div><label className="mb-2 block text-sm text-muted-foreground">Design tool</label><select value={categoryDetails.tool || "Figma"} onChange={(e) => setDetail("tool", e.target.value)} className="h-11 w-full rounded-md border border-border bg-background px-4 text-base"><option>Figma</option><option>Adobe Photoshop</option><option>Adobe Illustrator</option><option>Adobe InDesign</option><option>Adobe XD</option><option>Canva</option><option>Other</option></select></div>
               </div>
-              <div>
-                <label className="mb-2 block text-sm text-muted-foreground">Design preview link (optional)</label>
-                <input value={categoryDetails.preview_url || ""} onChange={(e) => setDetail("preview_url", e.target.value)} placeholder="https://" className="h-11 w-full rounded-md border border-border bg-background px-4 text-base" />
-              </div>
-              <div>
-                <label className="mb-2 block text-sm text-muted-foreground">Deliverables</label>
-                <input value={categoryDetails.deliverables || ""} onChange={(e) => setDetail("deliverables", e.target.value)} placeholder="Brand identity, UI kit, landing page..." className="h-11 w-full rounded-md border border-border bg-background px-4 text-base" />
-              </div>
+              <div><label className="mb-2 block text-sm text-muted-foreground">Preview / case study link (optional)</label><input value={categoryDetails.preview_url || ""} onChange={(e) => setDetail("preview_url", e.target.value)} placeholder="https://behance.net/..." className="h-11 w-full rounded-md border border-border bg-background px-4 text-base" /></div>
+              <div><label className="mb-2 block text-sm text-muted-foreground">Deliverables</label><input value={categoryDetails.deliverables || ""} onChange={(e) => setDetail("deliverables", e.target.value)} placeholder="Logo, social post set, brand guide..." className="h-11 w-full rounded-md border border-border bg-background px-4 text-base" /></div>
+            </div>
+          ) : form.category === "Web" ? (
+            <div className="space-y-4 rounded-md border border-border bg-muted/20 p-4">
+              <div><h3 className="text-sm font-semibold">Website project details</h3><p className="mt-1 text-xs text-muted-foreground">Add the website type, live page, repository, and technologies.</p></div>
+              <div><label className="mb-2 block text-sm text-muted-foreground">Website type</label><select value={categoryDetails.project_type || "Landing page"} onChange={(e) => setDetail("project_type", e.target.value)} className="h-11 w-full rounded-md border border-border bg-background px-4 text-base"><option>Landing page</option><option>Business website</option><option>E-commerce</option><option>Portfolio</option><option>Dashboard</option><option>Blog / CMS</option><option>Other</option></select></div>
+              <div className="grid grid-cols-2 gap-3"><div><label className="mb-2 block text-sm text-muted-foreground">Live website</label><input value={form.live_link} onChange={set("live_link")} placeholder="https://example.com" className="h-11 w-full rounded-md border border-border bg-background px-4 text-base" /></div><div><label className="mb-2 block text-sm text-muted-foreground">Source code</label><input value={form.github_link} onChange={set("github_link")} placeholder="https://github.com/..." className="h-11 w-full rounded-md border border-border bg-background px-4 text-base" /></div></div>
+              <div><label className="mb-2 block text-sm text-muted-foreground">Tech stack (comma separated)</label><input value={form.tags} onChange={set("tags")} placeholder="Next.js, Tailwind CSS, Supabase" className="h-11 w-full rounded-md border border-border bg-background px-4 text-base" /></div>
             </div>
           ) : (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-muted-foreground">{form.category === "App" ? "App / Demo Link" : "Website Link"}</label>
-                  <input value={form.live_link} onChange={set("live_link")} placeholder="https://" className="h-11 w-full rounded-md border border-border bg-background px-4 text-base" />
-                </div>
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-muted-foreground">Repository Link</label>
-                  <input value={form.github_link} onChange={set("github_link")} placeholder="https://github.com/..." className="h-11 w-full rounded-md border border-border bg-background px-4 text-base" />
-                </div>
-              </div>
-              <div>
-                <label className="mb-2 block text-sm font-medium text-muted-foreground">{form.category === "App" ? "Technologies" : "Tech Stack"} (comma separated)</label>
-                <input value={form.tags} onChange={set("tags")} placeholder="React, Next.js, TypeScript" className="h-11 w-full rounded-md border border-border bg-background px-4 text-base" />
-              </div>
+            <div className="space-y-4 rounded-md border border-border bg-muted/20 p-4">
+              <div><h3 className="text-sm font-semibold">App project details</h3><p className="mt-1 text-xs text-muted-foreground">Describe the app platform and add its demo or repository.</p></div>
+              <div className="grid grid-cols-2 gap-3"><div><label className="mb-2 block text-sm text-muted-foreground">App type</label><select value={categoryDetails.app_type || "Web app"} onChange={(e) => setDetail("app_type", e.target.value)} className="h-11 w-full rounded-md border border-border bg-background px-4 text-base"><option>Web app</option><option>Android app</option><option>iOS app</option><option>Cross-platform app</option><option>Desktop app</option><option>Other</option></select></div><div><label className="mb-2 block text-sm text-muted-foreground">Platform / framework</label><input value={categoryDetails.app_platform || ""} onChange={(e) => setDetail("app_platform", e.target.value)} placeholder="React Native, Flutter..." className="h-11 w-full rounded-md border border-border bg-background px-4 text-base" /></div></div>
+              <div className="grid grid-cols-2 gap-3"><div><label className="mb-2 block text-sm text-muted-foreground">App / demo link</label><input value={form.live_link} onChange={set("live_link")} placeholder="https://..." className="h-11 w-full rounded-md border border-border bg-background px-4 text-base" /></div><div><label className="mb-2 block text-sm text-muted-foreground">Source code</label><input value={form.github_link} onChange={set("github_link")} placeholder="https://github.com/..." className="h-11 w-full rounded-md border border-border bg-background px-4 text-base" /></div></div>
+              <div><label className="mb-2 block text-sm text-muted-foreground">Technologies (comma separated)</label><input value={form.tags} onChange={set("tags")} placeholder="Flutter, Firebase..." className="h-11 w-full rounded-md border border-border bg-background px-4 text-base" /></div>
             </div>
           )}
 
