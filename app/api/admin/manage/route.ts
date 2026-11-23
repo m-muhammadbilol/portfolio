@@ -12,12 +12,13 @@ const projectSchema = z.object({
   image_urls: z.array(z.string().url()).max(12),
   tags: z.array(z.string()), category: z.enum(["Web", "App", "Ads", "Design"]),
   category_details: z.record(z.string(), z.string().max(500)),
-  sort_order: z.number().int(), is_published: z.boolean(),
+  sort_order: z.number().int(), is_published: z.boolean(), is_pinned: z.boolean(),
 })
 
 const requestSchema = z.discriminatedUnion("action", [
   z.object({ action: z.literal("project.save"), project: projectSchema }),
   z.object({ action: z.literal("project.publish"), id: z.string().uuid(), is_published: z.boolean() }),
+  z.object({ action: z.literal("project.pin"), id: z.string().uuid(), is_pinned: z.boolean() }),
   z.object({ action: z.literal("project.delete"), id: z.string().uuid() }),
   z.object({ action: z.literal("content.save"), content: z.array(z.object({ key: z.string(), value_uz: z.string(), value_en: z.string() })), settings: z.record(z.string(), z.string()).optional() }),
   z.object({ action: z.literal("settings.cursor"), cursor: z.string() }),
@@ -43,6 +44,8 @@ export async function POST(request: Request) {
       error = result.error
     } else if (body.action === "project.publish") {
       error = (await supabase.from("projects").update({ is_published: body.is_published, updated_at: new Date().toISOString() }).eq("id", body.id)).error
+    } else if (body.action === "project.pin") {
+      error = (await supabase.from("projects").update({ is_pinned: body.is_pinned, updated_at: new Date().toISOString() }).eq("id", body.id)).error
     } else if (body.action === "project.delete") {
       error = (await supabase.from("projects").delete().eq("id", body.id)).error
     } else if (body.action === "content.save") {

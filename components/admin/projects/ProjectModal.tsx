@@ -88,6 +88,7 @@ export function ProjectModal({ project, onClose, onSaved }: Props) {
           const value = categoryDetails[key] || categoryDetailDefaults[form.category]?.[key] || ""
           return value ? [[key, value] as const] : []
         })),
+        is_pinned: project?.is_pinned ?? false,
         sort_order: parseInt(form.sort_order || "0", 10),
         is_published: form.is_published,
         image_urls: imageUrls,

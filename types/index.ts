@@ -11,6 +11,7 @@ export interface Project {
   tags: string[]
   category?: string
   category_details?: Record<string, string>
+  is_pinned?: boolean
   sort_order: number
   is_published: boolean
   created_at: string

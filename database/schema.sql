@@ -58,6 +58,7 @@ CREATE TABLE IF NOT EXISTS projects (
   tags            TEXT[] DEFAULT '{}',
   category        TEXT NOT NULL DEFAULT 'Web',
   category_details JSONB NOT NULL DEFAULT '{}'::jsonb,
+  is_pinned       BOOLEAN NOT NULL DEFAULT false,
   sort_order      INT DEFAULT 0,
   is_published    BOOLEAN DEFAULT true,
   created_at      TIMESTAMPTZ DEFAULT now(),

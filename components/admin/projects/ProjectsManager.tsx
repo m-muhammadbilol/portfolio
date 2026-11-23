@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Plus, Pencil, Trash2, Eye, EyeOff } from "lucide-react"
+import { Plus, Pencil, Trash2, Eye, EyeOff, Pin, PinOff } from "lucide-react"
 import { toast } from "sonner"
 import { ProjectModal } from "./ProjectModal"
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog"
@@ -12,6 +12,7 @@ export function ProjectsManager({ initialProjects }: { initialProjects: Project[
   const [modalOpen, setModalOpen] = useState(false)
   const [editProject, setEditProject] = useState<Project | null>(null)
   const [deleteId, setDeleteId] = useState<string | null>(null)
+  const [pinningId, setPinningId] = useState<string | null>(null)
 
   const refresh = async () => {
     const response = await fetch("/api/admin/projects")
@@ -36,6 +37,26 @@ export function ProjectsManager({ initialProjects }: { initialProjects: Project[
     const result = await response.json()
     if (!response.ok) { toast.error(result.error || "Holatni o'zgartirib bo'lmadi"); return }
     setProjects(prev => prev.map(p => p.id === project.id ? { ...p, is_published } : p))
+  }
+
+  const togglePin = async (project: Project) => {
+    const is_pinned = !project.is_pinned
+    setPinningId(project.id)
+    try {
+      const response = await fetch("/api/admin/manage", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "project.pin", id: project.id, is_pinned }),
+      })
+      const result = await response.json()
+      if (!response.ok) throw new Error(result.error || "Pin holatini o'zgartirib bo'lmadi")
+      setProjects((previous) => previous.map((item) => item.id === project.id ? { ...item, is_pinned } : item))
+      toast.success(is_pinned ? "Loyiha pin qilindi" : "Pin olib tashlandi")
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Pin holatini o'zgartirib bo'lmadi")
+    } finally {
+      setPinningId(null)
+    }
   }
 
   return (
@@ -76,6 +97,7 @@ export function ProjectsManager({ initialProjects }: { initialProjects: Project[
                   <td className="px-4 py-3">
                     <div className="max-w-[220px] truncate text-base font-medium">{project.title_uz}</div>
                     <div className="max-w-[220px] truncate text-sm text-muted-foreground">{project.title_en}</div>
+                    {project.is_pinned && <span className="mt-1 inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2 py-0.5 text-xs font-medium text-amber-700 dark:text-amber-300"><Pin size={11} /> Pin qilingan</span>}
                   </td>
                   <td className="px-4 py-3 hidden sm:table-cell">
                     <div className="flex flex-wrap gap-1">
@@ -92,6 +114,9 @@ export function ProjectsManager({ initialProjects }: { initialProjects: Project[
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center justify-end gap-1">
+                      <button type="button" onClick={() => togglePin(project)} disabled={pinningId === project.id} aria-label={project.is_pinned ? "Pinni olib tashlash" : "Loyihani pin qilish"} title={project.is_pinned ? "Pinni olib tashlash" : "Loyihani pin qilish"} className={`flex h-8 w-8 items-center justify-center rounded-md transition-colors hover:bg-accent disabled:opacity-50 ${project.is_pinned ? "text-amber-600 dark:text-amber-300" : "text-muted-foreground hover:text-foreground"}`}>
+                        {project.is_pinned ? <PinOff size={14} /> : <Pin size={14} />}
+                      </button>
                       <button onClick={() => togglePublish(project)} className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
                         {project.is_published ? <EyeOff size={14} /> : <Eye size={14} />}
                       </button>

@@ -25,7 +25,7 @@ export function ProjectsContent({ initialProjects }: { initialProjects: Project[
       return !q || title.toLowerCase().includes(q) || desc.toLowerCase().includes(q) || p.tags?.some(t => t.toLowerCase().includes(q))
     })
     .filter(p => activeCategory === "all" || (p.category || "").toLowerCase() === activeCategory.toLowerCase())
-    .sort((a, b) => a.sort_order - b.sort_order || new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+    .sort((a, b) => Number(Boolean(b.is_pinned)) - Number(Boolean(a.is_pinned)) || a.sort_order - b.sort_order || new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
 
   return (
     <main className="mx-auto min-h-screen max-w-5xl px-6 py-20 sm:py-24">
